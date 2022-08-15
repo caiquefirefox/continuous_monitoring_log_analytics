@@ -1,0 +1,19 @@
+# install  and configure docker
+curl -fsSL https://get.docker.com -o get-docker.sh
+sudo sh get-docker.sh
+sudo usermod -aG docker $USER
+# installl docker compose
+sudo curl -L "https://github.com/docker/compose/releases/download/v2.4.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+# START DOCKER
+sudo gpasswd -a $USER  docker
+sudo gpasswd -a $USER root
+sudo service docker start 
+sudo usermod -aG docker $USER
+newgrp docker
+#install git
+sudo apt install git -y 
+# Download loki/grafana
+sudo wget https://raw.githubusercontent.com/grafana/loki/v2.5.0/production/docker-compose.yaml -O docker-compose.yaml
+sudo docker-compose -f docker-compose.yaml up
+

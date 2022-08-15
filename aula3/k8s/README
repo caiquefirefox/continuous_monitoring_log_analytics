@@ -1,0 +1,74 @@
+PESSOAL, nosso lab hoje consiste em:
+Instalando e configurar o kind
+
+instalando e configurando o helm chart
+
+instalando e configurando o prometheus operator
+
+instalando e configurando o grafana server
+
+configurar o prometheus server para exportar métricas do nosso cluster k8s no grafana
+
+Acesso e overview das interfaces gráficas
+
+
+#HANDS ON 
+
+#O como fazer,  subir o https://kind.sigs.k8s.io/ direto no SO,  Linux  Macos, ou em uma instancia na nuvem.
+#No windows dica: https://community.chocolatey.org/packages/kind#install
+
+
+# install docker
+# installl docker compose
+# install golang
+# install  k8s(kind)
+# install  kubectl
+
+
+#Ubuntu 20.04 pode usar o script
+#baixa o script de setup: 
+wget https://raw.githubusercontent.com/taylordamaceno/continuous_monitoring_labs/main/Exercicio2/setup.sh 
+#e de permissão:
+ chmod +x setup.sh
+ #execute o script: 
+./setup.sh 
+
+
+
+#Entrar no diretório:
+
+ ~/continuous_monitoring_labs/environmentclass/Exercicio2
+  #criando o cluster k8s com o kind: 
+ ./kind create cluster --name testek8s
+
+ #instalando e configurando helm:
+sudo curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+sudo helm repo add stable https://charts.helm.sh/stable
+sudo  helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+sudo  helm repo update
+#Criando namespace: 
+ kubectl create ns monitoring 
+ #Instalando a stack do prometheus com helm: 
+ helm upgrade --namespace monitoring --install kube-stack-prometheus prometheus-community/kube-prometheus-stack --set prometheus-node-exporter.hostRootFsMount.enabled=false
+ #Configurando/acessando a interface gráfica do prometheus:
+ kubectl port-forward --namespace monitoring svc/kube-stack-prometheus-kube-prometheus 9090:9090
+ #acesso a interface via browser:
+ http://localhost:9090
+#exemplo: 
+container_cpu_usage_seconds_total
+mais detalhes sob o promQL
+https://prometheus.io/docs/introduction/first_steps/#using-the-expression-browser
+---------
+#Vá na aba status, target, e veja os endpoints do self discovery do prometheus
+
+
+ #credenciais grafana
+ kubectl get secret --namespace monitoring kube-stack-prometheus-grafana -o jsonpath='{.data.admin-user}' | base64 -d
+ kubectl get secret --namespace monitoring kube-stack-prometheus-grafana -o jsonpath='{.data.admin-password}' | base64 -d
+
+# Acessando o Grafana 
+ kubectl port-forward --namespace monitoring svc/kube-stack-prometheus-grafana 8080:80
+ 
+
+# destruindo o Cluster 
+kind delete cluster --name testek8s 

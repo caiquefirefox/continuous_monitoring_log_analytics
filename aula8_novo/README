@@ -1,0 +1,28 @@
+git clone https://github.com/jaegertracing/jaeger.git
+cd docker-compose/monitor/
+docker-compose up .
+
+
+
+abra no browser:
+http://localhost:16686/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

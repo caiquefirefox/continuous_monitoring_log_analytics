@@ -1,0 +1,43 @@
+Configurando prometheus  e integrando ele com grafana  usando docker e vagrant:
+
+git clone https://github.com/taylordamaceno/continuous_monitoring_labs.git
+
+cd ~/continuous_monitoring_labs/Exercicio2
+
+# subindo vagrant
+vagrant up
+# acessando instancia 
+vagrant ssh
+# preparando ambiente
+wget https://raw.githubusercontent.com/taylordamaceno/continuous_monitoring_labs/main/Exercicio2/setup2.sh
+chmod +x setup2.sh
+bash setup2.sh
+
+#dentro da instancia
+baixando arquivo de prometheus:
+
+wget https://raw.githubusercontent.com/taylordamaceno/continuous_monitoring_labs/main/Exercicio2/files/prometheus.yml
+
+Subindo prometheus:
+
+docker run -d --name prometheus -p 9090:9090 -v $PWD/prometheus.yml:/etc/prometheus/prometheus.yml prom/prometheus --config.file=/etc/prometheus/prometheus.yml
+
+Acessando pelo browser e explorando o prometheus:  http://localhost:9090/
+
+
+você pode checar a documentação sob query do prometheus:
+https://prometheus.io/docs/introduction/first_steps/#using-the-expression-browser
+
+------------------------------------
+
+------------------------------------
+Subindo grafana:
+
+docker run -d --name grafana -p 3000:3000 grafana/grafana
+
+Abra o grafana na porta 3000
+ 
+Forçando uso de cpu com stress-ng
+
+Explorando grafana e criando dashboard
+
