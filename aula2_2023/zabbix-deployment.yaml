@@ -1,0 +1,112 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zabbix
+  namespace: zabbix
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zabbix
+  template:
+    metadata:
+      labels:
+        app: zabbix
+    spec:
+      containers:
+      - name: zabbix
+        image: zabbix/zabbix-web-nginx-pgsql:ubuntu-4.0-latest
+        env:
+        - name: ZBX_SERVER_HOST
+          value: "zabbix-server"
+        - name: DB_SERVER_HOST
+          value: "postgres"
+        - name: POSTGRES_USER
+          value: "zabbix"
+        - name: POSTGRES_PASSWORD
+          value: "zabbix_password"
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - mountPath: /usr/share/zabbix
+          name: zabbix-data
+      volumes:
+      - name: zabbix-data
+        persistentVolumeClaim:
+          claimName: zabbix-pvc
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgresql
+  namespace: zabbix
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgresql
+  template:
+    metadata:
+      labels:
+        app: postgresql
+    spec:
+      containers:
+      - name: postgresql
+        image: postgres:10
+        ports:
+        - containerPort: 5432
+        env:
+        - name: POSTGRES_USER
+          value: "zabbix"
+        - name: POSTGRES_PASSWORD
+          value: "zabbix_password"
+        - name: POSTGRES_DB
+          value: "zabbix"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgresql
+  namespace: zabbix
+spec:
+  selector:
+    app: postgresql
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: zabbix
+  namespace: zabbix
+spec:
+  selector:
+    app: zabbix
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+      nodePort: 30080
+  type: NodePort
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zabbix-server
+  namespace: zabbix
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zabbix-server
+  template:
+    metadata:
+      labels:
+        app: zabbix-server
+    spec:
+      containers:
+      - name: zabbix-server
+        image: zabbix/zabbix-server-pgsql 

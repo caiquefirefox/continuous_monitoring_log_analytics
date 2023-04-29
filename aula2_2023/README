@@ -1,0 +1,39 @@
+Para quem precisa instalar vagrant
+
+sudo apt install virtualbox
+wget https://releases.hashicorp.com/vagrant/2.2.19/vagrant_2.2.19_x86_64.deb
+
+
+sudo apt install ./vagrant_2.2.19_x86_64.deb
+-------------------------------
+Para quem precisa instalar no windows
+https://community.chocolatey.org/packages/vagrant#individual	
+
+é possível instalar o cluster de k8s com chocalety direto no windows tbm.
+
+vagrant para equalizarmos SO, senão quiser, instale a distro o kind usando o chocolatey, segue abaixo:
+
+On Windows via Chocolatey (https://chocolatey.org/packages/kind)
+
+choco install kind
+
+
+------------
+instalando kind
+
+https://kind.sigs.k8s.io/docs/user/quick-start/
+
+
+On macOS via Homebrew:
+
+brew install kind
+
+windows 	
+choco install kind
+
+linux:
+curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.18.0/kind-linux-amd64
+chmod +x ./kind
+sudo mv ./kind /usr/local/bin/kind
+-------------------------------------
+
