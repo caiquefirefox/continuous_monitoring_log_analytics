@@ -67,36 +67,78 @@ Login: Admin
 Password: zabbix
 
 
-#zabbix instruction
-Configurar o Zabbix para monitorar a aplicação httpbin (continuação):
 
-Crie um grupo de hosts, templates e hosts:
-Vá para "Configuration" > "Host groups" e clique em "Create host group" para criar um novo grupo de hosts chamado, por exemplo, "Kubernetes Applications".
+Adicione um host no Zabbix:
 
-Vá para "Configuration" > "Templates" e clique em "Create template" para criar um novo template chamado, por exemplo, "Template Httpbin". Defina o grupo como "Templates" e clique em "Add".
+a. Faça login no painel de controle do Zabbix.
+b. Vá para "Configuration" > "Hosts" > "Create host".
+c. Preencha os campos "Host name" e "Visible name" com o nome da aplicação Httpbin.
+d. No campo "Groups", adicione o host a um grupo apropriado ou crie um novo grupo, como "Kubernetes Applications".
+e. Na aba "Interfaces", adicione a interface de IP e porta do serviço Httpbin no Kubernetes.
+f. Clique em "Add" para adicionar o host.
 
-Vá para "Configuration" > "Hosts" e clique em "Create host" para criar um novo host chamado, por exemplo, "Httpbin". Defina o grupo como "Kubernetes Applications" e adicione o "Template Httpbin" na seção "Templates". Em "Agent interfaces", defina o IP do serviço httpbin do Kubernetes (obtido com kubectl get svc httpbin) e clique em "Add".
-Criar itens e verificar a coleta:
+Crie um item de monitoramento:
 
-No host "Httpbin", vá para a guia "Items" e clique em "Create item".
-Crie um item chamado "Httpbin Status", com as seguintes configurações:
-Tipo: HTTP agent
-URL: http://<HTTPBIN_SERVICE_IP>/status/200 (substitua <HTTPBIN_SERVICE_IP> pelo IP do serviço httpbin)
-Intervalo de atualização: 1m
-Tipo de informação: Texto
-Clique em "Add" para salvar o item.
-Verifique se os dados estão sendo coletados corretamente na guia "Latest data" do host "Httpbin".
-Criar triggers:
+a. No painel de controle do Zabbix, vá para "Configuration" > "Hosts" e clique no host Httpbin recém-criado.
+b. Vá para a aba "Items" e clique em "Create item".
+c. No campo "Name", insira um nome para o item, como "Httpbin_status_check".
+d. Selecione "Type" como "Web monitoring" > "HTTP agent".
+e. No campo "Key", insira uma chave exclusiva para identificar o item, como "httpbin.status.check".
+f. No campo "URL", insira o URL do endpoint da aplicação Httpbin que você deseja monitorar (por exemplo, "http://<httpbin_service_ip>:<httpbin_service_port>/status/200").
+g. Defina o "Update interval" de acordo com a frequência desejada para verificar o status da aplicação.
+h. Clique em "Add" para adicionar o item.
 
-No template "Template Httpbin", vá para a guia "Triggers" e clique em "Create trigger".
-Crie uma trigger chamada "Httpbin Status Error", com as seguintes configurações:
-Nome: Httpbin Status Error
-Severidade: Alta
-Expressão: {Httpbin:http.status.last()}<>200
-Clique em "Add" para salvar a trigger.
-Simular alertas:
+Crie uma trigger para alertas (revisado):
 
-Para simular um alerta, altere temporariamente a URL do item "Httpbin Status" para http://<HTTPBIN_SERVICE_IP>/status/500.
-Após o próximo intervalo de atualização, a trigger "Httpbin Status Error" deve ser acionada e você verá o alerta na seção "Problems" do Zabbix.
-Reverta a URL do item para http://<HTTPBIN_SERVICE_IP>/status/200 e o alerta será resolvido após o próximo intervalo de atualização.
-Agora você tem um Zabbix configurado no Kubernetes, monitorando a aplicação httpbin e gerando alertas com base no status HTTP. Você pode adaptar essa configuração para monitorar outras aplicações e métricas, conforme necessário.
+a. No painel de controle do Zabbix, vá para "Configuration" > "Hosts" e clique no host Httpbin.
+b. Vá para a aba "Triggers" e clique em "Create trigger".
+c. No campo "Name", insira um nome para a trigger, como "Httpbin_status_alert".
+d. No campo "Expression", clique no botão "Add" no canto inferior direito.
+e. Selecione o host Httpbin na lista suspensa "Host".
+f. Selecione o item "Httpbin_status_check" na lista suspensa "Item".
+g. Escolha a função "last()" na lista suspensa "Function".
+h. No campo "Result", insira "=0".
+i. Clique em "Insert" para adicionar a expressão.
+j. Ajuste a "Severity" de acordo com a importância do alerta (por exemplo, "High" ou "Average").
+k. Clique em "Add" para adicionar a trigger.
+
+
+Simulação de alerta:
+
+Para simular um alerta, você pode alterar temporariamente o endpoint da aplicação Httpbin que está sendo monitorado ou interromper o serviço Httpbin.
+
+a. Edite o item de monitoramento criado anteriormente e altere o URL para um endpoint inexistente ou com erro, como "http://<httpbin_service_ip>:<httpbin_service_port>/status/500".
+b. Aguarde o intervalo de atualização do item e verifique se a trigger foi acionada na seção "Monitoring" > "Problems" no painel de controle do Zabbix.
+c. Após verificar o alerta, lembre-se de reverter o URL do item de monitoramento para o endpoint correto da aplicação Httpbin.
+
+Agora você tem um cenário de simulação de alerta configurado no Zabbix para monitorar a aplicação Httpbin executando em seu cluster Kubernetes
+
+
+Edite o item de monitoramento existente:
+
+a. No painel de controle do Zabbix, vá para "Configuration" > "Hosts" e clique no host Httpbin.
+b. Vá para a aba "Items" e clique no item "Httpbin_status_check".
+c. No campo "Name", insira um nome para o item, como "Httpbin_response_time".
+d. No campo "Key", insira uma chave exclusiva para identificar o item, como "httpbin.response.time".
+e. No campo "Type of information", selecione "Numeric (float)".
+f. Clique em "Update" para salvar as alterações.
+
+Crie uma nova trigger para alertas:
+
+a. No painel de controle do Zabbix, vá para "Configuration" > "Hosts" e clique no host Httpbin.
+b. Vá para a aba "Triggers" e clique em "Create trigger".
+c. No campo "Name", insira um nome para a trigger, como "Httpbin_slow_response_alert".
+d. No campo "Expression", clique no botão "Add" no canto inferior direito.
+e. Selecione o host Httpbin na lista suspensa "Host".
+f. Selecione o item "Httpbin_response_time" na lista suspensa "Item".
+g. Escolha a função "last()" na lista suspensa "Function".
+h. No campo "Result", insira um limite de tempo de resposta, como ">0.5" (para acionar um alerta quando o tempo de resposta for superior a 0,5 segundos).
+i. Clique em "Insert" para adicionar a expressão.
+j. Ajuste a "Severity" de acordo com a importância do alerta (por exemplo, "High" ou "Average").
+k. Clique em "Add" para adicionar a trigger.
+
+Agora, a trigger será acionada quando o tempo de resposta da aplicação Httpbin exceder o limite definido. Verifique se a trigger é acionada em "Monitoring" > "Problems" no painel de controle do Zabbix.
+
+
+kubectl scale deployment httpbin --replicas=0 -n app
+
