@@ -47,20 +47,24 @@ kubectl create ns zabbix app
 https://helm.sh/docs/intro/install/
 ## 
 #install zabbix helm
-helm repo add zabbix https://zabbix.github.io/zabbix-helm
-helm repo update
-helm install zabbix zabbix/zabbix --values zabbix-values.yaml
+helm upgrade --install zabbix zabbix-community/zabbix  -f zabbix_values.yaml
+
+
+
+# instalar pelo binario
+#https://devopscube.com/install-configure-helm-kubernetes/
 ##
 #Subindo app
 kubectl create -f appexample.yaml
 
 #port-forward
-kubectl port-forward <NOME_DO_POD> 8080:80
+kubectl port-forward service/zabbix-zabbix-web 8888:80 
 
-O usuário e a senha padrão do Zabbix são:
+Access Zabbix:
 
-Usuário: Admin
-Senha: zabbix
+URL: http://localhost:8888
+Login: Admin
+Password: zabbix
 
 
 #zabbix instruction
@@ -68,7 +72,9 @@ Configurar o Zabbix para monitorar a aplicação httpbin (continuação):
 
 Crie um grupo de hosts, templates e hosts:
 Vá para "Configuration" > "Host groups" e clique em "Create host group" para criar um novo grupo de hosts chamado, por exemplo, "Kubernetes Applications".
+
 Vá para "Configuration" > "Templates" e clique em "Create template" para criar um novo template chamado, por exemplo, "Template Httpbin". Defina o grupo como "Templates" e clique em "Add".
+
 Vá para "Configuration" > "Hosts" e clique em "Create host" para criar um novo host chamado, por exemplo, "Httpbin". Defina o grupo como "Kubernetes Applications" e adicione o "Template Httpbin" na seção "Templates". Em "Agent interfaces", defina o IP do serviço httpbin do Kubernetes (obtido com kubectl get svc httpbin) e clique em "Add".
 Criar itens e verificar a coleta:
 
