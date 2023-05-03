@@ -142,3 +142,58 @@ Agora, a trigger será acionada quando o tempo de resposta da aplicação Httpbi
 
 kubectl scale deployment httpbin --replicas=0 -n app
 
+
+
+Entendo que você já tem o ambiente configurado com o Zabbix e o httpbin no mesmo cluster do Kubernetes, e deseja simular um alarme simples. Vou detalhar os passos para que você possa criar e simular um alarme para o httpbin.
+
+Criar um host no Zabbix:
+Vá para a interface web do Zabbix e siga os passos abaixo para criar um host:
+
+Clique em "Configuration" (Configuração) no menu superior.
+Selecione "Hosts" no submenu.
+Clique no botão "Create host" (Criar host) no canto superior direito.
+Preencha os detalhes do host:
+Host name: Coloque um nome, por exemplo, "httpbin".
+Visible name: Coloque um nome visível, como "HTTP Bin Test".
+Groups: Selecione o grupo de hosts, como "Kubernetes".
+IP address: Informe o endereço IP do serviço httpbin no cluster.
+Criar um item para monitorar no host:
+Agora, crie um item para monitorar o status do httpbin.
+
+Vá para a página "Hosts" e clique no nome do host "httpbin".
+Clique na aba "Items" (Itens).
+Clique no botão "Create item" (Criar item) no canto superior direito.
+Preencha os detalhes do item:
+Name: Coloque um nome, como "HTTP Status".
+Key: Use "net.tcp.service.perf[HTTP, {IP do httpbin}, 80]".
+Type: Selecione "Zabbix agent" ou "Zabbix agent (active)".
+Update interval:
+
+
+Defina o intervalo de atualização, como "30s" (30 segundos) ou um valor de sua escolha.
+
+Data type: Selecione "Numeric (unsigned)".
+Units: Defina como "ms" (milissegundos).
+Clique em "Add" (Adicionar) para salvar o item.
+Criar uma trigger para o alarme:
+Agora, crie uma trigger para gerar um alarme com base no item criado anteriormente.
+
+Vá para a página "Hosts" e clique no nome do host "httpbin".
+Clique na aba "Triggers" (Disparadores).
+Clique no botão "Create trigger" (Criar disparador) no canto superior direito.
+Preencha os detalhes da trigger:
+Name: Coloque um nome, como "HTTP Status Alarm".
+Expression: Clique em "Add" (Adicionar) e selecione o item "HTTP Status" que você criou anteriormente. Configure a expressão para: "{httpbin:net.tcp.service.perf[HTTP, {IP do httpbin}, 80].last()} > 200" (substitua {IP do httpbin} pelo endereço IP do serviço httpbin no cluster). Isso significa que a trigger será ativada se a resposta HTTP demorar mais de 200ms.
+Severity: Defina a severidade, como "Average" (Médio).
+Clique em "Add" (Adicionar) para salvar a trigger.
+
+curl "http://{IP do httpbin}:80/delay/5"
+
+
+Verificar o alarme:
+Para verificar se o alarme foi ativado, vá para a interface web do Zabbix e siga os passos abaixo:
+
+Clique em "Monitoring" (Monitoramento) no menu superior.
+Selecione "Problems" (Problemas) no submenu.
+Você deve ver o alarme "HTTP Status Alarm" listado como um problema ativo.
+Depois de seguir esses passos, você terá configurado e simulado um alarme simples no Zabbix para o httpbin. Você pode ajustar a expressão da trigger e outros parâmetros conforme necessário para adaptar às necessidades específicas de sua aula de monitoramento.
