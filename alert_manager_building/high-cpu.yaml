@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: high-cpu
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: high-cpu
+  template:
+    metadata:
+      labels:
+        app: high-cpu
+    spec:
+      containers:
+      - name: high-cpu
+        image: busybox
+        args:
+        - /bin/sh
+        - -c
+        - "while true; do echo 'High CPU usage'; done"
+

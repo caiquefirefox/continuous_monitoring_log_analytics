@@ -1,0 +1,169 @@
+Crie um cluster local do Kubernetes com Kind:
+bash
+Copy code
+kind create cluster --name monitoring-lab
+Verifique se o cluster foi criado e se o kubectl está configurado para usar o cluster correto:
+bash
+Copy code
+kubectl cluster-info --context kind-monitoring-lab
+Adicione o repositório do Helm do Prometheus Community:
+bash
+Copy code
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo update
+Instale o Prometheus e o Alertmanager no cluster usando o Helm chart kube-prometheus-stack:
+bash
+Copy code
+kubectl create namespace monitoring
+helm install prometheus prometheus-community/kube-prometheus-stack --namespace monitoring
+Aguarde até que todos os componentes sejam inicializados. Verifique o status dos pods:
+bash
+Copy code
+kubectl get pods -n monitoring
+Configure uma regra de alerta no Prometheus. Primeiro, crie um arquivo chamado alerting-rules.yaml com o seguinte conteúdo:
+yaml
+Copy code
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: example-alert
+  namespace: monitoring
+spec:
+  groups:
+  - name: example
+    rules:
+    - alert: HighCPUUsage
+      expr: (100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)) > 80
+      for: 1m
+      labels:
+        severity: warning
+      annotations:
+        summary: "High CPU usage on {{ $labels.instance }}"
+        description: "CPU usage is above 80% on {{ $labels.instance }} for more than 1 minute."
+Esta regra irá gerar um alerta chamado HighCPUUsage quando a utilização média da CPU for superior a 80% por mais de 1 minuto.
+
+Aplique a regra de alerta:
+bash
+Copy code
+kubectl apply -f alerting-rules.yaml
+Configure o Alertmanager para enviar notificações de alerta. Crie um arquivo chamado alertmanager-config.yaml com o seguinte conteúdo:
+yaml
+Copy code
+apiVersion: v1
+kind: Secret
+metadata:
+  name: alertmanager-prometheus-kube-prometheus-stack-alertmanager
+  namespace: monitoring
+stringData:
+  alertmanager.yaml: |-
+    global:
+      resolve_timeout: 5m
+    route:
+      group_by: ['alertname', 'severity']
+      group_wait: 30s
+      group_interval: 5m
+      repeat_interval: 1h
+      receiver: 'example-receiver'
+      routes:
+      - match:
+          severity: warning
+        receiver: 'example-receiver'
+    receivers:
+    - name: 'example-receiver'
+      webhook_configs:
+      - url: 'http://example-webhook-url.com'
+Neste exemplo, estamos usando um webhook fictício. Você deve substituir http://example-webhook-url.com pela URL do seu próprio webhook (por exemplo, Slack, PagerDuty, etc.).
+
+Aplique a configuração do Alertmanager:
+bash
+Copy code
+kubectl apply -f alertmanager-config.yaml
+Verifique se a configuração do Alertmanager foi atualizada:
+bash
+Copy code
+kubectl get secrets -n monitoring alertmanager-prometheus-kube-prometheus-stack-alertmanager -o
+jsonpath='{.data.alertmanager.yaml}' | base64 --decode
+
+
+11. Para testar o alerta, você pode implantar uma carga de trabalho que consome recursos de CPU, como uma instância do BusyBox executando um loop infinito. Crie um arquivo chamado `high-cpu-deployment.yaml` com o seguinte conteúdo:
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: high-cpu
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: high-cpu
+  template:
+    metadata:
+      labels:
+        app: high-cpu
+    spec:
+      containers:
+      - name: high-cpu
+        image: busybox
+        args:
+        - /bin/sh
+        - -c
+        - "while true; do echo 'High CPU usage'; done"
+kubectl apply -f high-cpu-deployment.yaml
+kubectl port-forward -n monitoring svc/prometheus-kube-prometheus-stack-prometheus 9090:9090
+kubectl port-forward -n monitoring svc/prometheus-kube-prometheus-stack-prometheus 9090:9090
+Aguarde alguns minutos para o Prometheus coletar métricas e avaliar a regra de alerta. Se a utilização média da CPU for superior a 80% por mais de 1 minuto, o alerta HighCPUUsage será acionado.
+
+Para verificar os alertas ativos, acesse a interface web do Prometheus:
+Abra seu navegador e vá para http://localhost:9090. Clique na guia "Alerts" para ver os alertas ativos.
+
+
+
+##
+
+Slack
+ vá para https://slack.com/ e crie um. Você pode criar uma conta gratuita com limitações.
+
+Vá para https://api.slack.com/messaging/webhooks e clique em "Criar seu aplicativo Slack" para começar a criar um aplicativo personalizado para o seu espaço de trabalho.
+
+Digite um nome para o aplicativo, como "Alertmanager Notifications", e selecione o espaço de trabalho onde deseja instalá-lo. Clique em "Criar aplicativo".
+
+Na página do aplicativo, clique em "Incoming Webhooks" no menu lateral.
+
+Ative a opção "Ativar Webhooks recebidos" e clique em "Adicionar novo webhook ao espaço de trabalho".
+
+Escolha um canal ou usuário para receber as notificações e clique em "Permitir". Copie a URL do webhook gerado.
+
+Atualize o arquivo alertmanager-config.yaml criado anteriormente, substituindo a URL do webhook de exemplo pela URL do webhook do Slack que você copiou:
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: alertmanager-prometheus-kube-prometheus-stack-alertmanager
+  namespace: monitoring
+stringData:
+  alertmanager.yaml: |-
+    global:
+      resolve_timeout: 5m
+    route:
+      group_by: ['alertname', 'severity']
+      group_wait: 30s
+      group_interval: 5m
+      repeat_interval: 1h
+      receiver: 'slack-receiver'
+      routes:
+      - match:
+          severity: warning
+        receiver: 'slack-receiver'
+    receivers:
+    - name: 'slack-receiver'
+      slack_configs:
+      - api_url: 'https://hooks.slack.com/services/your-webhook-url'
+        channel: '#your-channel-name'
+        text: "{{ range .Alerts }}{{ .Annotations.summary }}\n{{ end }}"
+Substitua 'https://hooks.slack.com/services/your-webhook-url' pela URL do webhook do Slack que você copiou e '#your-channel-name' pelo nome do canal ou usuário do Slack onde deseja receber as notificações.
+
+kubectl apply -f alertmanager-config.yaml
+Agora, quando o Alertmanager receber um alerta do Prometheus, ele enviará uma notificação para o canal ou usuário do Slack especificado.
+
+Lembre-se de que o plano gratuito do Slack tem limitações, como o número de mensagens arquivadas e a quantidade de aplicativos que podem ser instalados. No entanto, deve ser suficiente para fins de demonstração.
