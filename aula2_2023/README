@@ -48,6 +48,8 @@ https://helm.sh/docs/intro/install/
 # install helm on windows
 choco install kubernetes-helm
 ## 
+helm repo add zabbix-community https://zabbix-community.github.io/helm-zabbix
+helm repo update
 #install zabbix helm
 helm upgrade --install zabbix zabbix-community/zabbix  -f zabbix_values.yaml
 
