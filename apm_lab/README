@@ -1,0 +1,71 @@
+Crie um cluster local do Kubernetes com Kind:
+
+
+kind create cluster --name apm-lab
+Verifique se o cluster foi criado e se o kubectl está configurado para usar o cluster correto:
+
+
+kubectl cluster-info --context kind-apm-lab
+Crie um namespace chamado elastic:
+b
+kubectl create namespace elastic
+Implante o Elasticsearch no cluster usando o Helm chart oficial. Primeiro, adicione o repositório do Helm da Elastic:
+
+helm repo add elastic https://helm.elastic.co
+helm repo update
+Em seguida, instale o Elasticsearch:
+
+
+helm install elasticsearch elastic/elasticsearch --namespace elastic --set imageTag=7.15.0
+Implante o Kibana no cluster:
+
+helm install kibana elastic/kibana --namespace elastic --set imageTag=7.15.0
+Implante o APM Server no cluster:
+
+helm install apm-server elastic/apm-server --namespace elastic --set imageTag=7.15.0
+Aguarde até que todos os componentes sejam inicializados. Verifique o status dos pods:
+
+kubectl get pods --namespace elastic
+Crie um arquivo chamado nginx-apm.yaml com o seguinte conteúdo:
+yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.21
+        ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx
+spec:
+  selector:
+    app: nginx
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: LoadBalancer
+#Implante a aplicação de teste (Nginx):
+
+kubectl apply -f nginx-apm.yaml
+#Obtenha o endereço IP do serviço Kibana e acesse a interface web:
+
+kubectl port-forward service/kibana-kibana 5601:5601 --namespace elastic
+#Abra seu navegador e vá para http://localhost:5601.
+
+#No Kibana, vá para a seção APM e siga as instruções para instrumentar sua aplicação de teste com o agente APM. No nosso exemplo, estamos usando o Nginx, mas você pode escolher uma aplicação mais apropriada para demonstrar o APM.
