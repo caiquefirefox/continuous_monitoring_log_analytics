@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: zabbix-agent
+spec:
+  selector:
+    matchLabels:
+      app: zabbix-agent
+  template:
+    metadata:
+      labels:
+        app: zabbix-agent
+    spec:
+      containers:
+      - name: zabbix-agent
+        image: zabbix/zabbix-agent:5.4.9-alpine
+        envFrom:
+        - configMapRef:
+            name: zabbix-agent-config
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "128Mi"
+            cpu: "100m"
+        volumeMounts:
+        - name: zabbix-modules
+          mountPath: /var/lib/zabbix/modules
+        - name: zabbix-ssl
+          mountPath: /var/lib/zabbix/ssl
+      volumes:
+      - name: zabbix-modules
+        emptyDir: {}
+      - name: zabbix-ssl
+        emptyDir: {}
+

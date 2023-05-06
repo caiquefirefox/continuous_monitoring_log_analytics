@@ -1,0 +1,8 @@
+#Crie um arquivo chamado zabbix-agent-configmap.yaml:
+#Substitua "your_zabbix_server_host" pelo endereço IP ou nome do host do seu Zabbix Server.
+#crie o deamonset
+#Atualize a linha com a imagem do contêiner para usar a versão apropriada para o seu Zabbix Server:
+#        image: zabbix/zabbix-agent:
+#kubectl apply -f zabbix-agent-configmap.yaml
+#kubectl apply -f zabbix-agent-daemonset.yaml
+
