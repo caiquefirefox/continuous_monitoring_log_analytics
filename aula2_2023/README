@@ -39,7 +39,7 @@ sudo mv ./kind /usr/local/bin/kind
 #create cluster usando kind
 kind create cluster --name labx2
 # criando namespaces
-kubectl create ns zabbix app
+kubectl create ns 
 ## install helm
  curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
  chmod 700 get_helm.sh

@@ -3,6 +3,6 @@ kind: ConfigMap
 metadata:
   name: zabbix-agent-config
 data:
-  ZBX_SERVER_HOST: "your_zabbix_server_host"
+  ZBX_SERVER_HOST: "zabbix-zabbix-server"
   ZBX_ACTIVE_ALLOW: "true"
 
