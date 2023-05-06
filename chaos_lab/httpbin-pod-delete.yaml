@@ -1,0 +1,25 @@
+apiVersion: litmuschaos.io/v1alpha1
+kind: ChaosEngine
+metadata:
+  name: httpbin-chaos
+  namespace: litmus 
+spec:
+  appinfo:
+    appns: 'default'
+    applabel: 'app=httpbin'
+    appkind: 'deployment'
+  chaosServiceAccount: litmus-admin
+  monitoring: false
+  jobCleanUpPolicy: 'delete'
+  experiments:
+    - name: pod-delete
+      spec:
+        components:
+          env:
+            - name: TOTAL_CHAOS_DURATION
+              value: '30'
+            - name: CHAOS_INTERVAL
+              value: '10'
+            - name: FORCE
+              value: 'true'
+
