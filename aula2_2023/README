@@ -45,6 +45,8 @@ kubectl create ns zabbix app
  chmod 700 get_helm.sh
  ./get_helm.sh
 https://helm.sh/docs/intro/install/
+# install helm on windows
+choco install kubernetes-helm
 ## 
 #install zabbix helm
 helm upgrade --install zabbix zabbix-community/zabbix  -f zabbix_values.yaml
