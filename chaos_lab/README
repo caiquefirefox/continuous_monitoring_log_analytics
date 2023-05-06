@@ -1,0 +1,71 @@
+#Crie um cluster local do Kubernetes com Kind:
+
+
+kind create cluster --name chaos-lab
+#Verifique se o cluster foi criado e se o kubectl está configurado para usar o cluster correto:
+
+
+kubectl cluster-info --context kind-chaos-lab
+#Implante uma aplicação de teste. Neste exemplo, vamos implantar duas instâncias do Nginx:
+
+
+kubectl create deployment nginx --image=nginx --replicas=2
+kubectl expose deployment nginx --port=80 --type=LoadBalancer
+#Instale o Litmus Chaos, uma plataforma de Chaos Engineering de código aberto:
+bash
+Copy code
+kubectl apply -f https://litmuschaos.github.io/litmus/litmus-operator-v2.3.0.yaml
+#Verifique se o Litmus Chaos foi instalado corretamente:
+
+kubectl get pods -n litmus
+#Ative a experimentação do Chaos para o namespace default:
+
+
+kubectl apply -f https://litmuschaos.github.io/litmus/admin-mode.yaml
+#Vamos realizar um experimento de Chaos simples, matando um dos pods do Nginx aleatoriamente. Primeiro, instale o experimento "Pod Delete" do Litmus Chaos:
+
+
+kubectl apply -f https://hub.litmuschaos.io/api/chaos/master?file=charts/generic/pod-delete/experiment.yaml
+#Crie um arquivo chamado nginx-chaos.yaml com o seguinte conteúdo:
+
+apiVersion: litmuschaos.io/v1alpha1
+kind: ChaosEngine
+metadata:
+  name: nginx-chaos
+  namespace: default
+spec:
+  appinfo:
+    appns: 'default'
+    applabel: 'app=nginx'
+    appkind: 'deployment'
+  chaosServiceAccount: litmus-admin
+  monitoring: false
+  jobCleanUpPolicy: 'delete'
+  experiments:
+    - name: pod-delete
+      spec:
+        components:
+          env:
+            - name: TOTAL_CHAOS_DURATION
+              value: '30'
+            - name: CHAOS_INTERVAL
+              value: '10'
+            - name: FORCE
+              value: 'true'
+#Este arquivo define um ChaosEngine que mata um pod Nginx aleatório a cada 10 segundos por 30 segundos no total.
+
+#Aplique o arquivo nginx-chaos.yaml para iniciar o experimento de Chaos:
+
+
+kubectl apply -f nginx-chaos.yaml
+Monitore o progresso do experimento observando os logs do pod do executor de chaos:
+
+kubectl logs -f $(kubectl get pods -l name=pod-delete --no-headers -o custom-columns=:metadata.name) -n default
+#Depois de executar o experimento, você pode verificar o impacto do Chaos no cluster e na aplicação Nginx. Observe os logs, o status dos pods e o tráfego da rede durante o experimento.
+
+# limpar os recursos:
+
+Copy code
+kubectl delete -f nginx-chaos.yaml
+kubectl delete -f https://hub.litmuschaos.io/api/chaos/master?file=charts/generic/pod-delete/experiment.yaml
+kubectl delete -f https://litmuschaos.github.io/lit
