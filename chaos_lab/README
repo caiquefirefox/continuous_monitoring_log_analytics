@@ -13,8 +13,8 @@ kubectl create deployment nginx --image=nginx --replicas=2
 kubectl expose deployment nginx --port=80 --type=LoadBalancer
 #Instale o Litmus Chaos, uma plataforma de Chaos Engineering de código aberto:
 bash
-Copy code
-kubectl apply -f https://litmuschaos.github.io/litmus/litmus-operator-v2.3.0.yaml
+kubectl apply -f kubectl apply -f https://litmuschaos.github.io/litmus/3.0.0-beta6/litmus-3.0.0-beta6.yaml
+
 #Verifique se o Litmus Chaos foi instalado corretamente:
 
 kubectl get pods -n litmus
