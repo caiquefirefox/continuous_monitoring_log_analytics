@@ -1,0 +1,53 @@
+# Crie um cluster no KIND
+
+kind create cluster --name  aula4-casa
+
+# instale o metrics server
+kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+
+
+#Adicione os repositórios do Helm para Prometheus e Grafana
+
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo add grafana https://grafana.github.io/helm-charts
+helm repo update
+# Instale o Prometheus Operator no seu cluster
+ 
+helm install prometheus prometheus-community/kube-prometheus-stack
+
+#espere todos componentes subir antes de acessar o grafana. DEMORA ALGUNS minutos não vá para o próximo passo se os componentes nao estiverem running no status!
+kubectl --namespace default get pods -l "release=prometheus"
+
+
+#Instale o Grafana no seu cluster
+helm install grafana grafana/grafana
+#Após a instalação, você pode obter sua senha com:
+
+kubectl get secret --namespace default grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
+#E iniciar o port-forward para acessar o Grafana:
+
+kubectl port-forward service/grafana 3000:80
+
+logue no grafana:
+admin
+password(resultado do comando) 
+
+#data source e adicione o serviço do prometheus:
+http://prometheus-kube-prometheus-prometheus:9090
+
+
+
+#vamos as ver as métricas disponíveis no prometheus:
+kubectl port-forward -n default svc/prometheus-kube-prometheus-prometheus 9090:9090
+
+#acesse no browser
+http://localhost:9090/
+
+
+# Acesse o site: https://grafana.com/grafana/dashboards e explore
+
+# Vá no grafana dashboards --> New --> import 
+# Como teste coloque o id 315 selecione o datasource e clique em load
+
+
+
