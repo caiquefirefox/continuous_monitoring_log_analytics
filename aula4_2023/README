@@ -51,3 +51,9 @@ http://localhost:9090/
 # id 12740
 
 
+#   helm delete prometheus prometheus-community/kube-prometheus-stack
+#   helm delete grafana grafana/grafana
+https://grafana.com/blog/2023/01/19/how-to-monitor-kubernetes-clusters-with-the-prometheus-operator/
+ 
+
+

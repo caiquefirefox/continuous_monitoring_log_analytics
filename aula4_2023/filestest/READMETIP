@@ -1,0 +1,9 @@
+Node Exporter: Este é um dos exporters mais comuns para Prometheus. Ele permite monitorar os recursos de um servidor, como uso de CPU, uso de memória, IO de disco, rede e muito mais. Você pode configurar isso em seus nós do Kubernetes para mostrar como monitorar os recursos do sistema.
+
+cAdvisor: Outro exporter comum, cAdvisor (Container Advisor), permite monitorar o uso de recursos e o desempenho de containers individuais. Isso pode ser útil para mostrar como monitorar os recursos em nível de container no Kubernetes.
+
+Blackbox Exporter: Este exporter é usado para monitorar a disponibilidade de serviços através de solicitações HTTP, HTTPS, DNS, TCP e ICMP. Pode ser útil para demonstrar como monitorar a disponibilidade e o tempo de resposta de um serviço.
+
+Exporter de Banco de Dados: Existem exporters específicos para vários tipos de banco de dados como MySQL, PostgreSQL, MongoDB, etc. Você poderia executar uma instância de banco de dados em seu cluster e configurar o exporter apropriado para mostrar como monitorar um banco de dados.
+
+Alertmanager: Este é um componente de Prometheus que lida com alertas e encaminha-os para serviços de notificação. Você pode mostrar como configurar alertas com base em certas condições e como receber notificações quando essas condições são atendidas.

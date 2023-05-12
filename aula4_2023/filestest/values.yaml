@@ -1,0 +1,17 @@
+prometheus:
+  prometheusSpec:
+    additionalScrapeConfigs:
+      - job_name: 'blackbox'
+        scrape_interval: 5s
+        static_configs:
+          - targets:
+            - http://localhost  # Substitua por seu serviço
+        metrics_path: /probe
+        params:
+          module: [http_2xx]
+        relabel_configs:
+          - source_labels: [__address__]
+            target_label: __param_target
+          - target_label: __address__
+            replacement: blackbox-exporter.monitoring.svc.cluster.local:9115  # Endereço do Blackbox Exporter
+
