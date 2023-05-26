@@ -1,0 +1,23 @@
+#Add helm chart
+helm repo add grafana https://grafana.github.io/helm-charts
+
+#install grafana loki no namespace loki
+helm install loki grafana/loki-stack--namespace loki --create-namespace --set grafana.enabled=true
+
+#pega a senha do grafana
+kubectl get secret --namespace loki loki-grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
+# crie o nginx no namespace loki:
+kubectl create deployment nginx-deployment --image=nginx:1.14.2 -n loki
+
+#exponha o grafana para o host:
+kubectl port-forward --address 0.0.0.0 --namespace loki service/loki-grafana 3000:80
+#acessa a url
+ http://localhost:3000 using following credentials:
+
+#configure o data source do loki-headless no grafana
+http://loki-headless:3100
+
+#Clique em explore -> loki -> {namespace="loki"}
+
+
+
