@@ -2,7 +2,7 @@
 helm repo add grafana https://grafana.github.io/helm-charts
 
 #install grafana loki no namespace loki
-helm install loki grafana/loki-stack--namespace loki --create-namespace --set grafana.enabled=true
+helm install loki grafana/loki-stack --namespace loki --create-namespace --set grafana.enabled=true
 
 #pega a senha do grafana
 kubectl get secret --namespace loki loki-grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
