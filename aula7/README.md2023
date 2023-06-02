@@ -1,0 +1,16 @@
+#clone o repo
+git clone https://github.com/able2cloud/continuous_monitoring_log_analytics.git
+# crie o cluster de kind
+kind create cluster --name aula7 
+# entre no dir aula7 e crie os recursos na ordem dos numeros 00-xpto, 01-xpto
+kubectl create -f .
+#
+####### Para acessar o kibana ########### Abra 2 terminais: Em 1 você faz o port-forward para acessar o kibana e o outro você irá usar para apagar o pod do nginx, que como não tem acessos não tem logs para serem gerados. O delete do pod forçará a geração de logs.
+
+Terminal 1: $ kubectl port-forward svc/kibana 5601:5601 -n kube-logging # Mantenha esse terminal aberto durante a demonstração
+
+No browser, acesse http://localhost:5601/app/kibana e vá até o menu "discover" (primeiro ícone, canto superior esquerdo.
+
+Terminal 2: $ kubectl delete pod nomedopod aula
+
+No browser, clique em "Refresh" e veja os logs aparecerem.
