@@ -22,6 +22,7 @@ services:
     image: docker.elastic.co/logstash/logstash:7.15.0
     volumes:
       - ./logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+      - ./nginx:/var/log/nginx   # montar os logs do nginx
     depends_on:
       - elasticsearch
 

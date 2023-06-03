@@ -1,10 +1,7 @@
-docker-compose up -d
-
-
 Acesse o Kibana: Primeiro, você precisa abrir a interface web do Kibana. Geralmente, ela é acessível através da URL http://localhost:5601 se você instalou o Kibana na sua máquina local. Se estiver em um servidor remoto, substitua "localhost" pelo endereço IP do servidor.
 
-Configure o índice do Logstash: No painel esquerdo do Kibana, procure a opção "Stack Management" e clique nela. Em seguida, clique em "Index Patterns" e depois em "Create index pattern". Aqui, você precisa digitar o nome do índice do Logstash que deseja configurar. Se você não modificou a configuração padrão do Logstash, o índice deve ser logstash-*. Clique em "Next step".
+Defina o índice do Logstash: No painel esquerdo do Kibana, procure a opção "Stack Management" e clique nela. Em seguida, clique em "Index Patterns" e depois em "Create index pattern". Aqui, você precisa digitar o nome do índice do Logstash que deseja configurar. Se você não modificou a configuração padrão do Logstash, o índice deve ser logstash-*. Clique em "Next step".
 
 Escolha o campo de data/hora: O Kibana precisa saber qual campo em seus documentos contém o carimbo de data/hora para que ele possa realizar análises de séries temporais. Se você estiver usando a configuração padrão do Logstash, o campo deve ser @timestamp. Selecione este campo e clique em "Create index pattern".
 
-Explore seus dados: Agora você pode começar a explorar seus dados. No painel esquerdo, clique em "Discover" para começar a explorar seus dados. Você deverá ver uma lista de todos os documentos no índice do Logstash que você acabou de configurar.
+Explore seus dados: Agora você pode começar a explorar seus logs. No painel esquerdo, clique em "Discover" para começar a explorar seus logs. Você deverá ver uma lista de todos os logs no índice do Logstash que você acabou de configurar.
