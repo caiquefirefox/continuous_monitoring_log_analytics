@@ -1,0 +1,12 @@
+Em seguida, vá para http://localhost:5601 em seu navegador. Você deve ver a interface do Kibana.
+
+Agora, você precisará configurar um índice para os logs do Nginx. Vá para "Management" -> "Stack Management" -> "Index Patterns". Em seguida, clique em "Create index pattern". Digite "fluentd-*" e siga as instruções para criar o índice.
+
+Após a criação do índice, você poderá visualizar os logs indo para "Discover". Você deverá ver os logs do Nginx listados lá.
+
+Por favor, note que os deployments descritos acima são mínimos e não devem ser usados para produção. Você provavelmente precisará configurar coisas como persistência de dados para o Elasticsearch, ajustar as configurações para o seu ambiente, entre outros.
+
+
+
+
+

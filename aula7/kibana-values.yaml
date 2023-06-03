@@ -1,0 +1,3 @@
+image: "docker.elastic.co/kibana/kibana"
+imageTag: "7.13.1"
+
