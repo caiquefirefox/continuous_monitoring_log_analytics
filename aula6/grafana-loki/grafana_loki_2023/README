@@ -1,0 +1,43 @@
+Etapa 1: Crie um novo projeto no Azure DevOps
+
+Faça login na sua conta do Azure DevOps.
+
+No canto superior direito, clique em "Novo projeto".
+
+Dê um nome ao projeto e uma descrição (opcional). Deixe a visibilidade como "Público" para que todos possam acessá-lo. Clique em "Criar".
+
+Etapa 2: Crie um repositório Git
+
+No novo projeto, na coluna da esquerda, clique em "Repositórios" > "Arquivos".
+
+Clique em "Inicializar com um README ou arquivo gitignore". Marque a opção "Adicionar um README". Clique em "Inicializar".
+
+Etapa 3: Crie um novo pipeline de build
+
+Na coluna da esquerda, clique em "Pipelines" > "Pipelines".
+
+Clique em "Novo pipeline".
+
+Selecione "Azure Repos Git" como a fonte do código.
+
+Selecione o repositório que você acabou de criar.
+
+Selecione "Executar pipeline no agente". Isso abrirá um assistente para ajudá-lo a criar o pipeline.
+
+No assistente, escolha "Modelo vazio" para criar um pipeline de build simples.
+
+No painel de configuração do pipeline, clique em "+" na fase de trabalho para adicionar uma tarefa.
+
+Na caixa "Adicionar tarefas", pesquise por "script" e adicione a tarefa "Script da linha de comando".
+
+Configure a tarefa para executar o comando echo Hello, world!. Isso vai imprimir "Hello, world!" no console durante a build. Clique em "Adicionar".
+
+Clique em "Salvar e executar" no canto superior direito. Deixe as opções como estão e clique em "Salvar e executar" novamente. Isso vai executar a build.
+
+Etapa 4: Verifique a saída da build
+
+Depois que a build terminar, você deverá ver a saída "Hello, world!" no console.
+
+Você pode clicar em "Pipelines" > "Execuções" para ver a lista de todas as builds executadas.
+
+E isso é tudo! Este é um pipeline de build muito básico no Azure DevOps que seus alunos devem ser capazes de replicar. Ele simplesmente imprime "Hello, world!" no console durante a build.
