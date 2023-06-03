@@ -1,8 +1,6 @@
-git clone https://github.com/jaegertracing/jaeger.git
-cd docker-compose/monitor/
-docker-compose up .
-
-
+git clone https://github.com/able2cloud/continuous_monitoring_log_analytics.git
+cd aula8_novo/jaeger_lab/docker-compose/monitor
+docker-compose up -d jaeger
 
 abra no browser:
 http://localhost:16686/
