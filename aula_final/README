@@ -1,0 +1,19 @@
+#crie a imagem
+     sudo docker build -t my-dvwa .
+     sudo docker run -d -p 80:80 my-dvwa
+# acesse via browser
+http://localhost
+
+user admin
+senha password
+
+Clique em setup, depois em reset db
+logue de novo, e vários menus de vulnerabilidades estarao la, e diferentes mensagens de logs, serao geradas para cada caso. 
+
+
+se preferir baixe o arquivo python no repo
+
+wget http://url/attack.py
+
+e execute e depois cheque os logs
+
