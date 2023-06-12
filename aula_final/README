@@ -1,3 +1,5 @@
+#baixe o dockerfile
+wget https://raw.githubusercontent.com/able2cloud/continuous_monitoring_log_analytics/main/aula_final/Dockerfile
 #crie a imagem
      sudo docker build -t my-dvwa .
      sudo docker run -d -p 80:80 my-dvwa
@@ -13,7 +15,7 @@ logue de novo, e vários menus de vulnerabilidades estarao la, e diferentes mens
 
 se preferir baixe o arquivo python no repo
 
-wget http://url/attack.py
-
-e execute e depois cheque os logs
+wget https://raw.githubusercontent.com/able2cloud/continuous_monitoring_log_analytics/main/aula_final/attack.py
+python3 attack.py
+cheque os logs
 
