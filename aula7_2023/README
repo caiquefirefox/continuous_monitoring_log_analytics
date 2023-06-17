@@ -1,3 +1,7 @@
+baixe o docker compose
+wget https://raw.githubusercontent.com/able2cloud/continuous_monitoring_log_analytics/main/aula7_2023/docker-compose.yml
+docker-compose up
+
 Acesse o Kibana: Primeiro, você precisa abrir a interface web do Kibana. Geralmente, ela é acessível através da URL http://localhost:5601 se você instalou o Kibana na sua máquina local. Se estiver em um servidor remoto, substitua "localhost" pelo endereço IP do servidor.
 
 Defina o índice do Logstash: No painel esquerdo do Kibana, procure a opção "Stack Management" e clique nela. Em seguida, clique em "Index Patterns" e depois em "Create index pattern". Aqui, você precisa digitar o nome do índice do Logstash que deseja configurar. Se você não modificou a configuração padrão do Logstash, o índice deve ser logstash-*. Clique em "Next step".
