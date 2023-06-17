@@ -1,3 +1,6 @@
+# clone o repo
+git clone https://github.com/able2cloud/continuous_monitoring_log_analytics.git
+cd continuous_monitoring_log_analytics/aula7_2023 
 baixe o docker compose
 wget https://raw.githubusercontent.com/able2cloud/continuous_monitoring_log_analytics/main/aula7_2023/docker-compose.yml
 docker-compose up
