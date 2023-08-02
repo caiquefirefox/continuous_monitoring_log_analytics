@@ -1,2 +1,5 @@
+wget https://raw.githubusercontent.com/able2cloud/continuous_monitoring_log_analytics/main/container_dockerfile/Dockerfile
+wget https://raw.githubusercontent.com/able2cloud/continuous_monitoring_log_analytics/main/container_dockerfile/index.html
+wget https://raw.githubusercontent.com/able2cloud/continuous_monitoring_log_analytics/main/container_dockerfile/Dockerfile
 docker build -t meu-nginx .
-docker run -d -p 80:80 meu-nginx .
+docker run -d -p 80:80 aula-nginx .
