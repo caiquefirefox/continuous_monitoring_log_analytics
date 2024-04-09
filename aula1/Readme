@@ -22,6 +22,35 @@ Criar Cluster Kubernetes com Kind
 Execute o comando abaixo para criar um cluster chamado labx2:
 
 kind create cluster --name labx2
+
+Instalação do kubectl
+Windows:
+
+Abra o PowerShell como administrador e instale kubectl usando Chocolatey:
+
+choco install kubernetes-cli
+Verifique a instalação com:
+
+kubectl version --client
+macOS:
+
+Use Homebrew para instalar kubectl:
+brew install kubectl
+Verifique a instalação com:
+kubectl version --client
+Linux:
+
+Use o comando curl para baixar a versão mais recente do kubectl e instalá-lo:
+
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+chmod +x ./kubectl
+sudo mv ./kubectl /usr/local/bin/kubectl
+Verifique a instalação com:
+
+kubectl version --client
+
+
+
 Instalação do Helm
 Windows:
 
@@ -39,40 +68,151 @@ Configuração do Zabbix com Helm
 Adicione o repositório Helm do Zabbix e atualize:
 
 
-helm repo add zabbix-community https://zabbix-community.github.io/helm-zabbix
+helm helm repo add zabbix-community https://zabbix-community.github.io/helm-zabbix
 helm repo update
 Instale o Zabbix usando Helm:
 
 
-helm upgrade --install zabbix zabbix-community/zabbix -f zabbix_values.yaml
-Subindo uma Aplicação e Configurando o Monitoramento no Zabbix
-Suba sua aplicação usando kubectl (substitua appexample.yaml pelo arquivo de configuração da sua aplicação):
-
-kubectl create -f appexample.yaml
-Configure o port-forwarding para acessar o Zabbix Web UI:
+helm install zabbix zabbix-community/zabbix
 
 
+Cheque se o serviço está de pé:
+kubectl get pods
+
+agora exponha a porta via host:
 kubectl port-forward service/zabbix-zabbix-web 8888:80
+
+Abra interface gráfica
+
 Acesse o Zabbix em http://localhost:8888
-Use as credenciais padrão (geralmente Admin para usuário e zabbix para senha)
+Use as credenciais padrão:
+Usuário: Admin
+Senha: zabbix
+
 Configuração no Zabbix
 Adicionar um Host no Zabbix:
 
-Faça login no Zabbix.
-Navegue até "Configuration" > "Hosts" > "Create host".
-Preencha os campos necessários (por exemplo, nome do host e grupo).
-Criar um Item de Monitoramento:
 
-Selecione o host criado e vá para a aba "Items".
-Clique em "Create item" e configure o item de monitoramento.
-Criar uma Trigger:
 
-Vá para a aba "Triggers" do host.
-Clique em "Create trigger" e configure a trigger para o item de monitoramento.
-Simulação de Alerta
-Para testar o monitoramento, simule uma condição de alerta (por exemplo, faça a aplicação responder com erro ou demorar mais para responder).
-Edite o item de monitoramento ou a aplicação para induzir a condição de alerta.
-Verifique no Zabbix, sob "Monitoring" > "Problems", se o alerta foi acionado.
-Edição e Criação de Novas Triggers
-Edite o item ou crie novas triggers conforme necessário para simular diferentes condições de monitoramento e alerta.
-Este tutorial agora fornece um caminho claro para instalar o Kind, configurar o Kubernetes, instalar o Zabbix usando o Helm, e configurar o monitoramento e alertas dentro do Zabbix.
+
+Subindo uma Aplicação e Configurando o Monitoramento no Zabbix
+Suba sua aplicação usando kubectl
+
+appexample.yaml
+
+
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: httpbin
+spec:
+  replicas: 2 
+  selector:
+    matchLabels:
+      app: httpbin
+  template:
+    metadata:
+      labels:
+        app: httpbin
+    spec:
+      containers:
+      - name: httpbin
+        image: kennethreitz/httpbin
+        ports:
+        - containerPort: 80
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: httpbin
+spec:
+  selector:
+    app: httpbin
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: LoadBalancer
+
+
+crie a app
+kubectl create -f nginx.yaml
+
+
+checar serviço do nginx
+ kubectl get svc | grep nginx
+
+
+
+
+
+
+Implantar o NGINX no Kubernetes
+Primeiro, certifique-se de que o NGINX está implantado no seu cluster Kubernetes. Você pode usar o seguinte manifesto para criar um Deployment e um Service:
+
+Crie um arquivo nginx-deployment.yaml com o seguinte conteúdo:
+
+yaml
+Copy code
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:latest
+        ports:
+        - containerPort: 80
+Crie um arquivo nginx-service.yaml com o seguinte conteúdo:
+
+yaml
+Copy code
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx
+spec:
+  type: LoadBalancer
+  selector:
+    app: nginx
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+Aplique esses manifestos no Kubernetes com:
+
+kubectl apply -f nginx-deployment.yaml
+kubectl apply -f nginx-service.yaml
+Monitorar o NGINX no Zabbix
+Para monitorar o NGINX no Zabbix, siga estas etapas:
+
+Adicione o host no Zabbix:
+
+Vá para "Configuration" > "Hosts" no Zabbix e clique em "Create host".
+Preencha as informações do host (por exemplo, nome do host nginx e grupo ao qual ele pertencerá).
+Crie um Item de Monitoramento:
+
+Na página de configuração do host nginx, procure por uma aba ou seção chamada "Items" e clique em "Create item".
+Aqui está como você pode configurar o item:
+Name: NGINX Homepage Check
+Type: Selecione "HTTP agent" ou similar, dependendo da sua versão do Zabbix.
+Key: Este é um identificador único para o item. Para um item de HTTP agent, o Zabbix geralmente preenche automaticamente este campo com uma chave adequada, como web.page.get[<url>,<path>,<port>]. Você pode precisar ajustar isso para apontar para o seu serviço NGINX, como web.page.get[http://nginx-service.default.svc.cluster.local,,80], substituindo nginx-service.default.svc.cluster.local pelo nome do serviço do NGINX no seu cluster Kubernetes.
+Configure os demais parâmetros conforme necessário, como o intervalo de atualização (update interval) e as condições de trigger.
+Salvar o item:
+
+Após configurar, clique em "Add" para salvar o item de monitoramento.
+Crie Triggers conforme necessário:
+
+Volte para a página de detalhes do host nginx, vá para a aba "Triggers", e crie triggers para definir sob quais condições você deseja ser alertado sobre problemas com o serviço NGINX.
