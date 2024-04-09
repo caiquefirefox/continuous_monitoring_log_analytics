@@ -1,0 +1,78 @@
+Instalação do Kind
+Windows:
+
+Abra o PowerShell como administrador e execute:
+choco install kind
+Verifique a instalação com kind --version.
+macOS:
+
+Abra o Terminal e execute:
+
+brew install kind
+Verifique a instalação com kind --version.
+Linux:
+
+Execute no Terminal:
+
+curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.18.0/kind-linux-amd64
+chmod +x ./kind
+sudo mv ./kind /usr/local/bin/kind
+Verifique a instalação com kind --version.
+Criar Cluster Kubernetes com Kind
+Execute o comando abaixo para criar um cluster chamado labx2:
+
+kind create cluster --name labx2
+Instalação do Helm
+Windows:
+
+Execute no PowerShell:
+
+choco install kubernetes-helm
+macOS e Linux:
+
+Execute no Terminal:
+
+curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+chmod 700 get_helm.sh
+./get_helm.sh
+Configuração do Zabbix com Helm
+Adicione o repositório Helm do Zabbix e atualize:
+
+
+helm repo add zabbix-community https://zabbix-community.github.io/helm-zabbix
+helm repo update
+Instale o Zabbix usando Helm:
+
+
+helm upgrade --install zabbix zabbix-community/zabbix -f zabbix_values.yaml
+Subindo uma Aplicação e Configurando o Monitoramento no Zabbix
+Suba sua aplicação usando kubectl (substitua appexample.yaml pelo arquivo de configuração da sua aplicação):
+
+kubectl create -f appexample.yaml
+Configure o port-forwarding para acessar o Zabbix Web UI:
+
+
+kubectl port-forward service/zabbix-zabbix-web 8888:80
+Acesse o Zabbix em http://localhost:8888
+Use as credenciais padrão (geralmente Admin para usuário e zabbix para senha)
+Configuração no Zabbix
+Adicionar um Host no Zabbix:
+
+Faça login no Zabbix.
+Navegue até "Configuration" > "Hosts" > "Create host".
+Preencha os campos necessários (por exemplo, nome do host e grupo).
+Criar um Item de Monitoramento:
+
+Selecione o host criado e vá para a aba "Items".
+Clique em "Create item" e configure o item de monitoramento.
+Criar uma Trigger:
+
+Vá para a aba "Triggers" do host.
+Clique em "Create trigger" e configure a trigger para o item de monitoramento.
+Simulação de Alerta
+Para testar o monitoramento, simule uma condição de alerta (por exemplo, faça a aplicação responder com erro ou demorar mais para responder).
+Edite o item de monitoramento ou a aplicação para induzir a condição de alerta.
+Verifique no Zabbix, sob "Monitoring" > "Problems", se o alerta foi acionado.
+Edição e Criação de Novas Triggers
+Edite o item ou crie novas triggers conforme necessário para simular diferentes condições de monitoramento e alerta.
+Este tutorial agora fornece um caminho claro para instalar o Kind, configurar o Kubernetes, instalar o Zabbix usando o Helm, e configurar o monitoramento e alertas dentro do Zabbix.
