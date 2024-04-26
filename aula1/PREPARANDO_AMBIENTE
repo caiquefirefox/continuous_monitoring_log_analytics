@@ -1,0 +1,88 @@
+WINDOWS:
+
+Para instalar o Chocolatey no Windows, você pode seguir estes passos. Certifique-se de que está usando uma sessão de linha de comando com privilégios de administrador:
+
+Abrir o Prompt de Comando como Administrador:
+Clique no menu Iniciar.
+Digite "cmd".
+Clique com o botão direito do mouse em "Prompt de Comando" e escolha "Executar como administrador".
+Executar o Script de Instalação:
+No Prompt de Comando, copie e cole o seguinte comando:
+
+Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+
+
+
+
+Instalação do Kind
+Windows:
+
+Abra o PowerShell como administrador e execute:
+choco install kind
+Verifique a instalação com kind --version.
+
+
+macOS:
+
+Abra o Terminal e execute:
+
+brew install kind
+Verifique a instalação com kind --version.
+
+Linux:
+
+Execute no Terminal:
+
+curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.18.0/kind-linux-amd64
+chmod +x ./kind
+sudo mv ./kind /usr/local/bin/kind
+Verifique a instalação com kind --version.
+Criar Cluster Kubernetes com Kind
+
+Instalando Kubectl
+
+Windows:
+
+Abra o PowerShell como administrador e instale kubectl usando Chocolatey:
+
+choco install kubernetes-cli
+Verifique a instalação com:
+
+kubectl version --client
+macOS:
+
+Use Homebrew para instalar kubectl:
+brew install kubectl
+Verifique a instalação com:
+kubectl version --client
+Linux:
+
+Use o comando curl para baixar a versão mais recente do kubectl e instalá-lo:
+
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+chmod +x ./kubectl
+sudo mv ./kubectl /usr/local/bin/kubectl
+Verifique a instalação com:
+
+kubectl version --client
+
+
+--------------------------------
+
+
+Instalação do Helm
+Windows:
+
+Execute no PowerShell:
+
+choco install kubernetes-helm
+macOS e Linux:
+
+Execute no Terminal:
+
+curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+chmod 700 get_helm.sh
+./get_helm.sh
+Configuração do Zabbix com Helm
+
+

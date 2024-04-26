@@ -1,71 +1,16 @@
-Instalação do Kind
-Windows:
 
-Abra o PowerShell como administrador e execute:
-choco install kind
-Verifique a instalação com kind --version.
-macOS:
 
-Abra o Terminal e execute:
+configuração kubectl é realizada pelo kind
 
-brew install kind
-Verifique a instalação com kind --version.
-Linux:
 
-Execute no Terminal:
+Create Cluster com kind:
 
-curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.18.0/kind-linux-amd64
-chmod +x ./kind
-sudo mv ./kind /usr/local/bin/kind
-Verifique a instalação com kind --version.
-Criar Cluster Kubernetes com Kind
-Execute o comando abaixo para criar um cluster chamado labx2:
-
-kind create cluster --name labx2
-
-Instalação do kubectl
-Windows:
-
-Abra o PowerShell como administrador e instale kubectl usando Chocolatey:
-
-choco install kubernetes-cli
-Verifique a instalação com:
-
-kubectl version --client
-macOS:
-
-Use Homebrew para instalar kubectl:
-brew install kubectl
-Verifique a instalação com:
-kubectl version --client
-Linux:
-
-Use o comando curl para baixar a versão mais recente do kubectl e instalá-lo:
-
-curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-chmod +x ./kubectl
-sudo mv ./kubectl /usr/local/bin/kubectl
-Verifique a instalação com:
-
-kubectl version --client
+kind create cluster aula1
 
 
 
-Instalação do Helm
-Windows:
+Configurando zabbix com helm
 
-Execute no PowerShell:
-
-choco install kubernetes-helm
-macOS e Linux:
-
-Execute no Terminal:
-
-curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
-chmod 700 get_helm.sh
-./get_helm.sh
-Configuração do Zabbix com Helm
-Adicione o repositório Helm do Zabbix e atualize:
 
 
 helm helm repo add zabbix-community https://zabbix-community.github.io/helm-zabbix
@@ -84,6 +29,80 @@ quando o serviço estiver running (depois mais de ou menos 1 minuto)
 agora exponha a porta via host:
 kubectl port-forward service/zabbix-zabbix-web 8888:80
 
+
+
+1. Criar um Deployment para o Zabbix Agent:
+
+Crie um arquivo YAML com o seguinte conteúdo:  zabbix-agent-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zabbix-agent
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zabbix-agent
+  template:
+    metadata:
+      labels:
+        app: zabbix-agent
+    spec:
+      containers:
+      - name: zabbix-agent
+        image: zabbix/zabbix-agent2:latest
+        command: ["-c", "/etc/zabbix/zabbix_agent2.conf"]
+        volumeMounts:
+        - name: zabbix-agent-config
+          mountPath: "/etc/zabbix"
+      volumes:
+      - name: zabbix-agent-config
+        configMap:
+          name: zabbix-agent-config
+
+
+kubectl apply -f zabbix-agent-deployment.yaml
+
+crie um configmap 
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: zabbix-agent-config
+data:
+  zabbix_agent2.conf: |
+    Server=zabbix-server
+    Hostname=zabbix-agent
+
+
+kubectl apply -f zabbix-agent-config.yaml
+
+
+3. Criar um Service para expor o Zabbix Agent:
+
+Crie um arquivo YAML com o seguinte conteúdo: zabbix-agent-service.yaml.
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: zabbix-agent
+spec:
+  selector:
+    app: zabbix-agent
+  ports:
+  - protocol: TCP
+    port: 10051
+    targetPort: 10051
+
+
+kubectl apply -f zabbix-agent-service.yaml
+
+
+
+
+
+
+
 Abra interface gráfica
 
 Acesse o Zabbix em http://localhost:8888
@@ -96,4 +115,42 @@ Adicionar um Host no Zabbix:
 
 
 
+4. Criar itens para CPU e memória:
+
+No Zabbix web interface, vá para Monitoramento > Hosts.
+Clique em Criar host.
+Nome: zabbix-agent
+Visibilidade: Agente
+Grupo: Kubernetes
+Host Interface:
+Tipo: Agente
+Host: zabbix-agent.default.svc.cluster.local
+Porta: 10051
+Clique em Adicionar.
+Aguarde alguns minutos para que o host seja descoberto e sincronizado.
+Vá para Monitoramento > Hosts.
+Selecione o host zabbix-agent.
+Clique em Itens.
+Clique em Criar item.
+Nome: cpu_usage
+Tipo: Agente
+Chave: vm.cpu.util[perc]
+Tipo de dados: Numérico
+Clique em Adicionar.
+Repita o processo para a memória, utilizando os seguintes valores:
+Nome: memory_usage
+Chave: vm.memory.used.percent
+Tipo de dados: Numérico
+5. Criando gatilhos:
+
+Vá para Monitoramento > Triggers.
+Clique em Criar trigger.
+Nome: CPU Usage High
+Expressão: {host:zabbix-agent:cpu_usage}>80
+Severidade: Alta
+Clique em Adicionar.
+Repita o processo para a memória, utilizando os seguintes valores:
+Nome: Memory Usage High
+Expressão: {host:zabbix-agent:memory_usage}>80
+Severidade: Alta
 
