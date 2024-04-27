@@ -64,7 +64,6 @@ spec:
           name: zabbix-agent-config
 
 
-kubectl apply -f zabbix-agent-deployment.yaml
 
 crie um configmap 
 
@@ -77,6 +76,9 @@ data:
   zabbix_agent2.conf: |
     Server=zabbix-server
     Hostname=zabbix-agent
+
+
+kubectl apply -f zabbix-agent-deployment.yaml
 
 
 kubectl apply -f zabbix-agent-config.yaml
