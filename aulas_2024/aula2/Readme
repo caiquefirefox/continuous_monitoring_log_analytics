@@ -15,7 +15,7 @@ Configurando zabbix com helm
 
 
 
-helm helm repo add zabbix-community https://zabbix-community.github.io/helm-zabbix
+helm  repo add zabbix-community https://zabbix-community.github.io/helm-zabbix
 helm repo update
 Instale o Zabbix usando Helm:
 
