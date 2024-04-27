@@ -85,7 +85,7 @@ chmod 700 get_helm.sh
 ./get_helm.sh
 Configuração do Zabbix com Helm
 
-
+kubectl create ns aula1
 testando nginx:
 
 
@@ -93,6 +93,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: nginx-deployment
+  namespace: aula1
 spec:
   replicas: 2
   selector:
