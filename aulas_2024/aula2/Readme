@@ -28,8 +28,6 @@ kubectl get pods -n monitoring -w
 
 quando o serviço estiver running (depois mais de ou menos 1 minuto)
 
-agora exponha a porta via host:
-kubectl port-forward service/zabbix-zabbix-web 8888:80 -n monitoring
 
 
 
@@ -107,8 +105,10 @@ kubectl apply -f zabbix-agent-service.yaml
 
 
 
+cheque sempre se está tudo rodando, kubectl get pods -n monitoring !
 
-
+agora exponha a porta via host:
+kubectl port-forward service/zabbix-zabbix-web 8888:80 -n monitoring &> zabbix-port-forward.log &
 
 
 Abra interface gráfica
