@@ -24,7 +24,7 @@ helm install zabbix zabbix-community/zabbix --namespace monitoring
 
 
 Cheque se o serviço está de pé:
-kubectl get pods -w
+kubectl get pods -n monitoring -w
 
 quando o serviço estiver running (depois mais de ou menos 1 minuto)
 
