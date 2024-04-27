@@ -54,7 +54,8 @@ spec:
       containers:
       - name: zabbix-agent
         image: zabbix/zabbix-agent2:latest
-        command: ["-c", "/etc/zabbix/zabbix_agent2.conf"]
+        args:
+          - "--config=/etc/zabbix/zabbix_agent2.conf"
         volumeMounts:
         - name: zabbix-agent-config
           mountPath: "/etc/zabbix"
