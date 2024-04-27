@@ -5,7 +5,7 @@ configuração kubectl é realizada pelo kind
 
 Create Cluster com kind:
 
-kind create cluster aula1
+kind create cluster aula2
 
 Crie o namespace
 
