@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: nginx-deployment
-  namaspace: aula1
+  namespace: aula1
 spec:
   replicas: 2
   selector:

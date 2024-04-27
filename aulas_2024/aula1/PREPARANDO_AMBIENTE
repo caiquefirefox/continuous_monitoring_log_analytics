@@ -114,6 +114,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: nginx-service
+  namespace: aula1
 spec:
   type: ClusterIP
   selector:
