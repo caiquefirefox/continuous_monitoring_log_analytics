@@ -81,7 +81,7 @@ data:
 kubectl apply -f zabbix-agent-deployment.yaml
 
 
-kubectl apply -f zabbix-agent-config.yaml
+kubectl apply -f zabbix-agent-configmap.yaml
 
 
 3. Criar um Service para expor o Zabbix Agent:
