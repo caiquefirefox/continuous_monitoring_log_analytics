@@ -124,4 +124,4 @@ spec:
     targetPort: 80
 
 
-kubectl port-forward service/nginx-service 8080:80
+kubectl port-forward service/nginx-service 8080:80 -n aula1
