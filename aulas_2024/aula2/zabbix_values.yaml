@@ -1,0 +1,32 @@
+zabbix:
+  server:
+    resources:
+      limits:
+        memory: 1Gi
+        cpu: 500m
+  frontend:
+    resources:
+      limits:
+        memory: 256Mi
+        cpu: 200m
+  agent:
+    resources:
+      limits:
+        memory: 128Mi
+        cpu: 100m
+
+database:
+  create: true
+  postgres:
+    resources:
+      limits:
+        memory: 1Gi
+        cpu: 500m
+
+zabbixProxy:
+  create: true
+  resources:
+    limits:
+      memory: 256Mi
+      cpu: 200m
+

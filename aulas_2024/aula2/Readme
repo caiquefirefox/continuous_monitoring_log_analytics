@@ -1,164 +1,37 @@
-
-
-configuração kubectl é realizada pelo kind
-
-
-Create Cluster com kind:
-
-kind create cluster aula2
-
-Crie o namespace
-
 kubectl create ns monitoring
 
-Configurando zabbix com helm
 
-
-
-helm  repo add zabbix-community https://zabbix-community.github.io/helm-zabbix
+helm repo add zabbix-community https://zabbix-community.github.io/helm-zabbix
 helm repo update
-Instale o Zabbix usando Helm:
+#install zabbix helm
 
-
-helm install zabbix zabbix-community/zabbix --namespace monitoring
-
-
-Cheque se o serviço está de pé:
-kubectl get pods -n monitoring -w
-
-quando o serviço estiver running (depois mais de ou menos 1 minuto)
+wget github/taylor/raw/zabbix_values.yaml
 
 
 
 
-1. Criar um Deployment para o Zabbix Agent:
-
-Crie um arquivo YAML com o seguinte conteúdo:  zabbix-agent-deployment.yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: zabbix-agent
-  namespace: monitoring
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: zabbix-agent
-  template:
-    metadata:
-      labels:
-        app: zabbix-agent
-    spec:
-      containers:
-      - name: zabbix-agent
-        image: zabbix/zabbix-agent2:latest
-        args:
-          - "--config=/etc/zabbix/zabbix_agent2.conf"
-        volumeMounts:
-        - name: zabbix-agent-config
-          mountPath: "/etc/zabbix"
-      volumes:
-      - name: zabbix-agent-config
-        configMap:
-          name: zabbix-agent-config
+helm upgrade --install zabbix zabbix-community/zabbix  -f zabbix_values.yaml
 
 
 
-crie um configmap 
-
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: zabbix-agent-config
-  namespace: monitoring
-data:
-  zabbix_agent2.conf: |
-    Server=zabbix-server
-    Hostname=zabbix-agent
 
 
-kubectl apply -f zabbix-agent-deployment.yaml
+Aguarde o zabbix subir: kubectl get pods -w -n monitoring
 
 
-kubectl apply -f zabbix-agent-configmap.yaml
+exponha o serviço do zabbix-web
 
-
-3. Criar um Service para expor o Zabbix Agent:
-
-Crie um arquivo YAML com o seguinte conteúdo: zabbix-agent-service.yaml.
-
-apiVersion: v1
-kind: Service
-metadata:
-  name: zabbix-agent
-  namespace: monitoring
-spec:
-  selector:
-    app: zabbix-agent
-  ports:
-  - protocol: TCP
-    port: 10051
-    targetPort: 10051
-
-
-kubectl apply -f zabbix-agent-service.yaml
+kubectl port-forward service/zabbix-zabbix-web 8888:80  -n monitoring
 
 
 
-cheque sempre se está tudo rodando, kubectl get pods -n monitoring !
-
-agora exponha a porta via host:
-kubectl port-forward service/zabbix-zabbix-web 8888:80 -n monitoring &> zabbix-port-forward.log &
-
-
-Abra interface gráfica
-
-Acesse o Zabbix em http://localhost:8888
-Use as credenciais padrão:
-Usuário: Admin
-Senha: zabbix
-
-Configuração no Zabbix
-Adicionar um Host no Zabbix:
 
 
 
-4. Criar itens para CPU e memória:
 
-No Zabbix web interface, vá para Monitoramento > Hosts.
-Clique em Criar host.
-Nome: zabbix-agent
-Visibilidade: Agente
-Grupo: Kubernetes
-Host Interface:
-Tipo: Agente
-Host: zabbix-agent.default.svc.cluster.local
-Porta: 10051
-Clique em Adicionar.
-Aguarde alguns minutos para que o host seja descoberto e sincronizado.
-Vá para Monitoramento > Hosts.
-Selecione o host zabbix-agent.
-Clique em Itens.
-Clique em Criar item.
-Nome: cpu_usage
-Tipo: Agente
-Chave: vm.cpu.util[perc]
-Tipo de dados: Numérico
-Clique em Adicionar.
-Repita o processo para a memória, utilizando os seguintes valores:
-Nome: memory_usage
-Chave: vm.memory.used.percent
-Tipo de dados: Numérico
-5. Criando gatilhos:
 
-Vá para Monitoramento > Triggers.
-Clique em Criar trigger.
-Nome: CPU Usage High
-Expressão: {host:zabbix-agent:cpu_usage}>80
-Severidade: Alta
-Clique em Adicionar.
-Repita o processo para a memória, utilizando os seguintes valores:
-Nome: Memory Usage High
-Expressão: {host:zabbix-agent:memory_usage}>80
-Severidade: Alta
+
+
+
+
 
