@@ -9,7 +9,7 @@ wget https://raw.githubusercontent.com/able2cloud/continuous_monitoring_log_anal
 
 
 
-helm upgrade --install zabbix zabbix-community/zabbix  -f zabbix_values.yaml
+helm upgrade --install zabbix zabbix-community/zabbix  -f zabbix_values.yaml -n monitoring
 
 
 
