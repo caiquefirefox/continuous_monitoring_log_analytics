@@ -1,0 +1,75 @@
+# Crie um cluster no KIND
+kind create cluster --name aula4-casa
+
+# Instale o Metrics Server
+wget /url/metricserverfull.yaml
+kubectl apply -f metricserverfull.yaml
+
+# Adicione os repositórios do Helm para Prometheus e Grafana
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo update
+
+# Instale o Prometheus Operator no seu cluster
+helm install prometheus prometheus-community/kube-prometheus-stack
+
+# Espere todos os componentes subirem antes de acessar o Grafana
+kubectl --namespace default get pods -l "release=prometheus"
+
+# Acessando o Prometheus:
+kubectl port-forward --address 0.0.0.0 svc/prometheus-kube-prometheus-prometheus 9090:9090
+
+# Consultas PromQL (exemplos):
+# Taxa de Requisições HTTP:
+sum(rate(http_requests_total[5m])) by (job)
+
+# Carga de CPU (timeseries):
+sum(rate(node_cpu_seconds_total{mode!="idle"}[5m])) by (instance)
+
+# Uso de Disco (percentual para cada nó):
+100 - (node_filesystem_avail_bytes{mountpoint="/"} * 100 / node_filesystem_size_bytes)
+
+# Número de Pods Rodando:
+count(kube_pod_info)
+
+# Status de Containers (rodando, esperando, etc.):
+count(kube_pod_container_status_running) or count(kube_pod_container_status_waiting) or count(kube_pod_container_status_terminated)
+
+# Obtenha a senha do Grafana
+kubectl get secret --namespace default prometheus-grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
+
+# Inicie o port-forward para acessar o Grafana
+kubectl port-forward svc/prometheus-grafana 3000:80
+
+# Faça login no Grafana:
+# Usuário: admin
+# Senha: (resultado do comando anterior)
+
+# Adicione o Prometheus como Data Source:
+1. No menu lateral esquerdo, clique em "Configuration" > "Data Sources".
+2. Clique em "Add data source".
+3. Escolha "Prometheus".
+4. Insira a URL: `http://prometheus-kube-prometheus-prometheus:9090`.
+5. Clique em "Save & Test".
+
+# Importe Dashboards:
+1. No menu lateral esquerdo, clique em "Dashboards" > "new".
+2. Clique em "Import".
+3. Para importar um dashboard, digite o ID:
+   - **ID 315:** Kubernetes cluster monitoring (por CoreOS).
+   - **ID 12740:** Kubernetes Monitoring (por Bitnami).
+4. Clique em "Load", selecione o data source "Prometheus" e clique em "Import".
+
+Depois de importar os dashboards no Grafana, siga estes passos para visualizar as monitorias funcionando:
+
+Acesse a seção de Dashboards:
+No menu lateral esquerdo, clique em "Dashboards" > "Manage" para abrir a lista de todos os dashboards disponíveis.
+Escolha o Dashboard Importado:
+Na lista de dashboards importados, você verá os que foram adicionados recentemente.
+Clique no nome do dashboard para abri-lo.
+Visualize os Dados:
+O dashboard abrirá com gráficos e painéis pré-configurados para monitorar os diferentes aspectos do seu cluster Kubernetes.
+Verifique se as consultas PromQL estão retornando os dados esperados. Caso contrário, confirme se o data source Prometheus está configurado corretamente.
+
+
+# Para limpar os recursos:
+helm delete prometheus
