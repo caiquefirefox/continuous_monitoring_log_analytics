@@ -73,3 +73,10 @@ Verifique se as consultas PromQL estão retornando os dados esperados. Caso cont
 
 # Para limpar os recursos:
 helm delete prometheus
+
+
+
+
+
+comando stress test
+kubectl exec -it ab-stress -- ab -n 10000 -c 100 http://httpbin-service:80/get
