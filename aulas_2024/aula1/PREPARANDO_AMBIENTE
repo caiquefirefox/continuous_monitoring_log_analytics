@@ -85,6 +85,10 @@ chmod 700 get_helm.sh
 ./get_helm.sh
 Configuração do Zabbix com Helm
 
+# Crie o Cluster kind
+
+kind create cluster --name palmeirasnaotemmundial
+
 kubectl create ns aula1
 testando nginx:
 
