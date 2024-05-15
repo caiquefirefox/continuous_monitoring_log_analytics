@@ -70,13 +70,31 @@ Visualize os Dados:
 O dashboard abrirá com gráficos e painéis pré-configurados para monitorar os diferentes aspectos do seu cluster Kubernetes.
 Verifique se as consultas PromQL estão retornando os dados esperados. Caso contrário, confirme se o data source Prometheus está configurado corretamente.
 
+Suba o httpbin, crie o HPA rode o stress test e observe as métricas:
+
+kubectl apply -f https://raw.githubusercontent.com/able2cloud/continuous_monitoring_log_analytics/main/aulas_2024/aula3/deploymentexample.yaml
+
+# se tiver curiosidade olhe as confs do deployment
+
+# Suba o service:
+kubectl apply -f https://raw.githubusercontent.com/able2cloud/continuous_monitoring_log_analytics/main/aulas_2024/aula3/servicehttpbin.yaml
+
+
+# Suba o pod de stress test
+kubectl apply -f https://raw.githubusercontent.com/able2cloud/continuous_monitoring_log_analytics/main/aulas_2024/aula3/pod.yaml
+
+# Suba o HPA
+
+kubectl apply -f https://raw.githubusercontent.com/able2cloud/continuous_monitoring_log_analytics/main/aulas_2024/aula3/hpa-full.yaml
+
+
+
+# comando stress test
+kubectl exec -it ab-stress -- ab -n 10000 -c 100 http://httpbin-service:80/get
+
+# observe os dash no grafana 
 
 # Para limpar os recursos:
 helm delete prometheus
 
-
-
-
-
-comando stress test
-kubectl exec -it ab-stress -- ab -n 10000 -c 100 http://httpbin-service:80/get
+kind delete cluster --name aula4
