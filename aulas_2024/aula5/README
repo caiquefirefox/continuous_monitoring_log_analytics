@@ -9,7 +9,9 @@ kubectl create serviceaccount dashboard-admin-sa -n default
 kubectl create clusterrolebinding dashboard-admin-sa --clusterrole=cluster-admin --serviceaccount=default:dashboard-admin-sa
 
 # Baixar o arquivo dashboard-admin-sa-token.yaml
-wget github.com/able2cloud/dashboard-admin-sa-token.yaml
+wget https://raw.githubusercontent.com/able2cloud/continuous_monitoring_log_analytics/main/aulas_2024/aula5/dashboard-admin-sa-token.yaml
+
+
 
 # Criar o token
 kubectl apply -f dashboard-admin-sa-token.yaml
@@ -21,8 +23,9 @@ kubectl describe secret dashboard-admin-sa-token -n default
 kubectl port-forward svc/kubernetes-dashboard -n kubernetes-dashboard 8001:443
 
 # Criar o httpbin
-wget github.com/able2cloud/httpbinfull.yaml
-kubectl create -f httpbinfull.yaml
+kubectl apply -f https://raw.githubusercontent.com/able2cloud/continuous_monitoring_log_analytics/main/aulas_2024/aula5/httpbinfull.yaml
+
+
 
 
 Acessar o Dashboard pelo Navegador
