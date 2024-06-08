@@ -2,7 +2,7 @@
 git clone https://github.com/able2cloud/continuous_monitoring_log_analytics.git
 cd continuous_monitoring_log_analytics/aula7_2023 
 baixe o docker compose
-wget https://raw.githubusercontent.com/able2cloud/continuous_monitoring_log_analytics/main/aula7_2023/docker-compose.yml
+wget https://raw.githubusercontent.com/able2cloud/continuous_monitoring_log_analytics/main/aulas_2023/aula7_2023/docker-compose.yml 
 docker-compose up
 
 Acesse o Kibana: Primeiro, você precisa abrir a interface web do Kibana. Geralmente, ela é acessível através da URL http://localhost:5601 se você instalou o Kibana na sua máquina local. Se estiver em um servidor remoto, substitua "localhost" pelo endereço IP do servidor.
