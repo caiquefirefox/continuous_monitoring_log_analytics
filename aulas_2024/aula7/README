@@ -13,8 +13,9 @@ jaeger-demo/
 Passos para Configurar e Executar
 1. Clonar o Repositório
 
-git clone https://github.com/usuario/jaeger-demo.git
-cd jaeger-demo
+git clone https://github.com/able2cloud/continuous_monitoring_log_analytics.git
+cd continuous_monitoring_log_analytics/aulas_2024/aula7/jaeger-demo
+
 
 
 app.py
