@@ -1,4 +1,4 @@
-version: '3'
+version: '3.8'
 
 services:
   jaeger:
@@ -21,4 +21,3 @@ services:
       - JAEGER_AGENT_HOST=jaeger
     depends_on:
       - jaeger
-

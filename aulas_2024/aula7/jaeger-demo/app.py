@@ -18,6 +18,10 @@ if __name__ == "__main__":
     with tracer.start_span('test_span') as span:
         span.set_tag('example_tag', 'test_value')
         span.log_kv({'event': 'test_message', 'life': 42})
-        time.sleep(1)
-    tracer.close()
+    
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        tracer.close()
 
