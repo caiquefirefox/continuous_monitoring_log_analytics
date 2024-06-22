@@ -4,6 +4,8 @@ kind create cluster --name ingress-lab
 # Verificar o cluster
 kubectl get nodes
 
+kubectl label node ingress-lab-control-plane ingress-ready=true
+kubectl label node ingress-lab-control-plane kubernetes.io/os=linux
 # Adicionar o repositório do Ingress NGINX
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
 
