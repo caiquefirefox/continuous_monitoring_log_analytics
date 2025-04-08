@@ -1,32 +1,40 @@
-zabbix:
-  server:
-    resources:
-      limits:
-        memory: 1Gi
-        cpu: 500m
-  frontend:
-    resources:
-      limits:
-        memory: 256Mi
-        cpu: 200m
-  agent:
-    resources:
-      limits:
-        memory: 128Mi
-        cpu: 100m
-
-database:
-  create: true
-  postgres:
-    resources:
-      limits:
-        memory: 1Gi
-        cpu: 500m
-
-zabbixProxy:
-  create: true
+zabbixServer:
+  enabled: true
+  image:
+    repository: zabbix/zabbix-server-pgsql
+    tag: alpine-6.0-latest
   resources:
     limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
       memory: 256Mi
-      cpu: 200m
+
+zabbixWeb:
+  enabled: true
+  image:
+    repository: zabbix/zabbix-web-nginx-pgsql
+    tag: alpine-6.0-latest
+  php:
+    timezone: America/Sao_Paulo
+  service:
+    type: ClusterIP
+    port: 80
+
+zabbixWebService:
+  enabled: false
+
+zabbixAgent:
+  enabled: false
+
+postgresql:
+  enabled: true
+  auth:
+    username: zabbix
+    password: zabbix
+    database: zabbix
+
+ingress:
+  enabled: false
 
