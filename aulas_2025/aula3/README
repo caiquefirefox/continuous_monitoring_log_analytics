@@ -1,24 +1,62 @@
+# Laboratório: Monitoramento com Prometheus e Grafana no Kubernetes
+
+Este guia demonstra como configurar e utilizar o Prometheus e Grafana para monitoramento em um cluster Kubernetes. Ele abrange:
+- Criação de um cluster Kind
+- Instalação do Metrics Server
+- Configuração do Prometheus e Grafana
+- Exemplos de consultas PromQL
+- Teste de carga com uma aplicação httpbin e HPA (Horizontal Pod Autoscaler)
+
+✅ **Atualizado: Aula 3**
+
+---
+
+## 1. Configuração do Ambiente
+
+### 1.1. Criar Cluster Kind
+```bash
 # Crie um cluster no KIND
 kind create cluster --name aula4
+```
 
-# Instale o Metrics Server
+### 1.2. Instalar o Metrics Server
+```bash
 wget https://raw.githubusercontent.com/able2cloud/continuous_monitoring_log_analytics/main/aulas_2024/aula3/metricserverfull.yaml
 kubectl apply -f metricserverfull.yaml
+```
 
+---
+
+## 2. Instalação do Prometheus e Grafana
+
+### 2.1. Adicionar Repositórios do Helm
+```bash
 # Adicione os repositórios do Helm para Prometheus e Grafana
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 helm repo update
+```
 
+### 2.2. Instalar o Prometheus Operator
+```bash
 # Instale o Prometheus Operator no seu cluster
 helm install prometheus prometheus-community/kube-prometheus-stack
 
 # Espere todos os componentes subirem antes de acessar o Grafana
 kubectl --namespace default get pods -l "release=prometheus"
+```
 
+---
+
+## 3. Acesso e Uso do Prometheus
+
+### 3.1. Acessar o Prometheus
+```bash
 # Acessando o Prometheus:
 kubectl port-forward --address 0.0.0.0 svc/prometheus-kube-prometheus-prometheus 9090:9090
+```
 
-# Consultas PromQL (exemplos):
+### 3.2. Exemplos de Consultas PromQL
+```
 # Taxa de Requisições HTTP:
 sum(rate(http_requests_total[5m])) by (job)
 
@@ -33,25 +71,35 @@ count(kube_pod_info)
 
 # Status de Containers (rodando, esperando, etc.):
 count(kube_pod_container_status_running) or count(kube_pod_container_status_waiting) or count(kube_pod_container_status_terminated)
+```
 
-# Obtenha a senha do Grafana
+---
+
+## 4. Configuração e Uso do Grafana
+
+### 4.1. Obter a Senha do Grafana
+```bash
 kubectl get secret --namespace default prometheus-grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
+```
 
+### 4.2. Acessar o Grafana
+```bash
 # Inicie o port-forward para acessar o Grafana
 kubectl port-forward svc/prometheus-grafana 3000:80
 
 # Faça login no Grafana:
 # Usuário: admin
 # Senha: (resultado do comando anterior)
+```
 
-# Adicione o Prometheus como Data Source:
+### 4.3. Configurar o Prometheus como Data Source
 1. No menu lateral esquerdo, clique em "Configuration" > "Data Sources".
 2. Clique em "Add data source".
 3. Escolha "Prometheus".
 4. Insira a URL: `http://prometheus-kube-prometheus-prometheus:9090`.
 5. Clique em "Save & Test".
 
-# Importe Dashboards:
+### 4.4. Importar Dashboards
 1. No menu lateral esquerdo, clique em "Dashboards" > "new".
 2. Clique em "Import".
 3. Para importar um dashboard, digite o ID:
@@ -59,42 +107,45 @@ kubectl port-forward svc/prometheus-grafana 3000:80
    - **ID 12740:** Kubernetes Monitoring (por Bitnami).
 4. Clique em "Load", selecione o data source "Prometheus" e clique em "Import".
 
-Depois de importar os dashboards no Grafana, siga estes passos para visualizar as monitorias funcionando:
+### 4.5. Visualizar Dashboards
+1. No menu lateral esquerdo, clique em "Dashboards" > "Manage" para abrir a lista de todos os dashboards disponíveis.
+2. Escolha o Dashboard Importado e clique para abri-lo.
+3. Visualize os gráficos e painéis pré-configurados para monitorar os diferentes aspectos do seu cluster Kubernetes.
+4. Verifique se as consultas PromQL estão retornando os dados esperados.
 
-Acesse a seção de Dashboards:
-No menu lateral esquerdo, clique em "Dashboards" > "Manage" para abrir a lista de todos os dashboards disponíveis.
-Escolha o Dashboard Importado:
-Na lista de dashboards importados, você verá os que foram adicionados recentemente.
-Clique no nome do dashboard para abri-lo.
-Visualize os Dados:
-O dashboard abrirá com gráficos e painéis pré-configurados para monitorar os diferentes aspectos do seu cluster Kubernetes.
-Verifique se as consultas PromQL estão retornando os dados esperados. Caso contrário, confirme se o data source Prometheus está configurado corretamente.
+---
 
-Suba o httpbin, crie o HPA rode o stress test e observe as métricas:
+## 5. Teste de Carga com httpbin e HPA
 
+### 5.1. Implantar httpbin e Configurar HPA
+```bash
+# Implantar o httpbin
 kubectl apply -f https://raw.githubusercontent.com/able2cloud/continuous_monitoring_log_analytics/main/aulas_2024/aula3/deploymentexample.yaml
-
-# se tiver curiosidade olhe as confs do deployment
 
 # Suba o service:
 kubectl apply -f https://raw.githubusercontent.com/able2cloud/continuous_monitoring_log_analytics/main/aulas_2024/aula3/servicehttpbin.yaml
-
 
 # Suba o pod de stress test
 kubectl apply -f https://raw.githubusercontent.com/able2cloud/continuous_monitoring_log_analytics/main/aulas_2024/aula3/pod.yaml
 
 # Suba o HPA
-
 kubectl apply -f https://raw.githubusercontent.com/able2cloud/continuous_monitoring_log_analytics/main/aulas_2024/aula3/hpa-full.yaml
+```
 
-
-
-# comando stress test
+### 5.2. Executar Teste de Carga
+```bash
+# Comando stress test
 kubectl exec -it ab-stress -- ab -n 10000 -c 100 http://httpbin-service:80/get
 
-# observe os dash no grafana 
+# Observe os dashboards no Grafana para monitorar o comportamento do sistema durante o teste
+```
 
+---
+
+## 6. Limpeza dos Recursos
+```bash
 # Para limpar os recursos:
 helm delete prometheus
 
 kind delete cluster --name aula4
+```
