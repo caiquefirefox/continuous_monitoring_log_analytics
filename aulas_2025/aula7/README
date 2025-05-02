@@ -1,0 +1,109 @@
+Jaeger Demo com Docker Compose
+Este repositório contém um exemplo de configuração para subir o Jaeger e uma aplicação Python simples usando Docker Compose. A aplicação Python envia spans para o Jaeger, que pode ser visualizado na interface gráfica do Jaeger.
+
+Estrutura do Projeto
+
+jaeger-demo/
+├── app.py
+├── Dockerfile
+├── docker-compose.yml
+└── requirements.txt
+
+
+Passos para Configurar e Executar
+1. Clonar o Repositório
+
+git clone https://github.com/able2cloud/continuous_monitoring_log_analytics.git
+cd continuous_monitoring_log_analytics/aulas_2024/aula7/jaeger-demo
+
+
+
+app.py
+import time
+import opentracing
+from jaeger_client import Config
+
+def init_jaeger_tracer(service_name='my_service'):
+    config = Config(
+        config={
+            'sampler': {'type': 'const', 'param': 1},
+            'logging': True,
+        },
+        service_name=service_name,
+        validate=True,
+    )
+    return config.initialize_tracer()
+
+if __name__ == "__main__":
+    tracer = init_jaeger_tracer()
+    with tracer.start_span('test_span') as span:
+        span.set_tag('example_tag', 'test_value')
+        span.log_kv({'event': 'test_message', 'life': 42})
+        time.sleep(1)
+    tracer.close()
+
+
+requirements.txt
+opentracing
+jaeger-client
+
+
+Dockerfile
+# Use uma imagem base oficial do Python
+FROM python:3.12
+
+# Defina o diretório de trabalho
+WORKDIR /app
+
+# Copie os arquivos de requisitos
+COPY requirements.txt .
+
+# Instale as dependências
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copie o restante dos arquivos da aplicação
+COPY . .
+
+# Comando para executar a aplicação
+CMD ["python", "app.py"]
+
+docker-compose.yml
+version: '3'
+
+services:
+  jaeger:
+    image: jaegertracing/all-in-one:1.29
+    ports:
+      - "5775:5775/udp"
+      - "6831:6831/udp"
+      - "6832:6832/udp"
+      - "5778:5778"
+      - "16686:16686"
+      - "14268:14268"
+      - "14250:14250"
+      - "9411:9411"
+    environment:
+      - COLLECTOR_ZIPKIN_HTTP_PORT=9411
+
+  python-app:
+    build: .
+    environment:
+      - JAEGER_AGENT_HOST=jaeger
+    depends_on:
+      - jaeger
+
+. Construir e Executar os Contêineres
+Execute o comando abaixo no diretório raiz do projeto:
+
+docker-compose up --build
+
+Acessar a Interface do Jaeger
+Após iniciar os contêineres, você pode acessar a interface do Jaeger no seu navegador de internet:
+
+http://localhost:16686
+
+Visualizar os Traces no Jaeger
+Acesse http://localhost:16686 no seu navegador.
+No campo "Service" (Serviço), selecione my_service (nome do serviço definido no script Python).
+Clique em "Find Traces" (Encontrar Traces).
+Uma lista de traces deve aparecer. Clique em qualquer trace para visualizar os detalhes, incluindo spans, tags, logs e o tempo de execução.

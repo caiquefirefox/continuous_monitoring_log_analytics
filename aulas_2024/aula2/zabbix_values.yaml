@@ -2,7 +2,7 @@ zabbixServer:
   enabled: true
   image:
     repository: zabbix/zabbix-server-pgsql
-    tag: alpine-6.0-latest
+    tag: alpine-6.4.10
   resources:
     limits:
       cpu: 500m
@@ -15,7 +15,7 @@ zabbixWeb:
   enabled: true
   image:
     repository: zabbix/zabbix-web-nginx-pgsql
-    tag: alpine-6.0-latest
+    tag: alpine-6.4.10
   php:
     timezone: America/Sao_Paulo
   service:

@@ -1,0 +1,35 @@
+# Criar o Cluster com Kind
+kind create cluster --name aula5
+
+# Instalar o Kubernetes Dashboard
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.7.0/aio/deploy/recommended.yaml
+
+# Criar uma Conta de Serviço e Cluster Role Binding
+kubectl create serviceaccount dashboard-admin-sa -n default
+kubectl create clusterrolebinding dashboard-admin-sa --clusterrole=cluster-admin --serviceaccount=default:dashboard-admin-sa
+
+# Baixar o arquivo dashboard-admin-sa-token.yaml
+wget https://raw.githubusercontent.com/able2cloud/continuous_monitoring_log_analytics/main/aulas_2024/aula5/dashboard-admin-sa-token.yaml
+
+
+
+# Criar o token
+kubectl apply -f dashboard-admin-sa-token.yaml
+
+# Obter o Token de Acesso
+kubectl describe secret dashboard-admin-sa-token -n default
+
+# Fazer o Port-Forward para Acessar o Dashboard
+kubectl port-forward svc/kubernetes-dashboard -n kubernetes-dashboard 8001:443
+
+# Criar o httpbin
+kubectl apply -f https://raw.githubusercontent.com/able2cloud/continuous_monitoring_log_analytics/main/aulas_2024/aula5/httpbinfull.yaml
+
+
+
+
+Acessar o Dashboard pelo Navegador
+Abra seu navegador e acesse a URL: https://localhost:8001/
+Quando a página de login do Kubernetes Dashboard aparecer, selecione a opção Token e cole o token obtido anteriormente. Clique em Sign In.
+Verificar o httpbin no Kubernetes Dashboard
+Navegue até os recursos do Kubernetes Dashboard para visualizar o httpbin que foi criado.

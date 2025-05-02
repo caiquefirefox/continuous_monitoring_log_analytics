@@ -15,7 +15,20 @@ spec:
     spec:
       containers:
       - name: nginx
-        image: nginx:1.25.3
+        image: nginx:stable-alpine
         ports:
         - containerPort: 80
-
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service
+  namespace: aula1
+spec:
+  type: ClusterIP
+  selector:
+    app: nginx
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80 

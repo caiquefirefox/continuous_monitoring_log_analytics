@@ -1,0 +1,57 @@
+# Criar um cluster Kind
+kind create cluster --name ingress-lab
+
+# Verificar o cluster
+kubectl get nodes
+
+kubectl label node ingress-lab-control-plane ingress-ready=true
+kubectl label node ingress-lab-control-plane kubernetes.io/os=linux
+# Adicionar o repositório do Ingress NGINX
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
+
+# Verificar a instalação
+kubectl get pods -n ingress-nginx --watch
+
+# Criar um deployment e um serviço
+kubectl create deployment hello-world --image=gcr.io/google-samples/hello-app:1.0
+kubectl expose deployment hello-world --port=8080 --target-port=8080
+
+# Verificar os serviços
+kubectl get svc
+
+# Criar um arquivo YAML para o Ingress
+cat <<EOF > ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: hello-world-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - host: hello-world.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: hello-world
+            port:
+              number: 8080
+EOF
+
+# Aplicar o Ingress Resource
+kubectl apply -f ingress.yaml
+
+# Adicionar uma entrada no arquivo hosts para apontar hello-world.local para o endereço IP do cluster Kind
+sed -i '$ a\127.0.0.1 hello-world.local' /etc/hosts
+
+# Testar o acesso via Ingress usando curl
+curl http://hello-world.local
+
+# Verificar os logs do Ingress Controller
+kubectl logs -n ingress-nginx --tail 10 -l app.kubernetes.io/name=ingress-nginx
+
+# Verificar os eventos
+kubectl get events --namespace ingress-nginx
