@@ -1,4 +1,4 @@
-# Laboratório: Monitoramento com Prometheus e Grafana no Kubernetes
+# Laboratório Atualizado: Monitoramento com Prometheus e Grafana no Kubernetes
 
 Este guia demonstra como configurar e utilizar o Prometheus e Grafana para monitoramento em um cluster Kubernetes. Ele abrange:
 - Criação de um cluster Kind
@@ -7,7 +7,7 @@ Este guia demonstra como configurar e utilizar o Prometheus e Grafana para monit
 - Exemplos de consultas PromQL
 - Teste de carga com uma aplicação httpbin e HPA (Horizontal Pod Autoscaler)
 
-✅ **Atualizado: Aula 3**
+✅ **Data da Atualização: 7 de Abril de 2025**
 
 ---
 
@@ -148,4 +148,4 @@ kubectl exec -it ab-stress -- ab -n 10000 -c 100 http://httpbin-service:80/get
 helm delete prometheus
 
 kind delete cluster --name aula4
-```
+``` 

@@ -1,4 +1,4 @@
-# Laboratório: Configuração de Ingress NGINX no Kubernetes
+# Laboratório Atualizado: Configuração de Ingress NGINX no Kubernetes
 
 Este guia demonstra como configurar e utilizar o Ingress NGINX no Kubernetes. Ele abrange:
 - Criação de um cluster Kind otimizado para Ingress
@@ -6,7 +6,7 @@ Este guia demonstra como configurar e utilizar o Ingress NGINX no Kubernetes. El
 - Implantação de uma aplicação de exemplo
 - Criação e teste de regras de Ingress
 
-✅ **Atualizado: Aula 8**
+✅ **Data da Atualização: 7 de Abril de 2025**
 
 ---
 
@@ -115,4 +115,4 @@ kubectl logs -n ingress-nginx --tail 10 -l app.kubernetes.io/name=ingress-nginx
 
 # Verificar os eventos
 kubectl get events --namespace ingress-nginx
-```
+``` 

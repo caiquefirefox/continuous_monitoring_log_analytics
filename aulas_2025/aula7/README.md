@@ -1,11 +1,11 @@
-# Laboratório: Jaeger para Rastreamento Distribuído com Docker Compose
+# Laboratório Atualizado: Jaeger para Rastreamento Distribuído com Docker Compose
 
 Este guia demonstra como configurar e utilizar o Jaeger para rastreamento distribuído (distributed tracing) usando Docker Compose. Ele abrange:
 - Configuração de um ambiente com Docker Compose
 - Implementação de uma aplicação Python simples que envia spans para o Jaeger
 - Visualização e análise de traces na interface gráfica do Jaeger
 
-✅ **Atualizado: Aula 7**
+✅ **Data da Atualização: 7 de Abril de 2025**
 
 ---
 
@@ -140,4 +140,4 @@ http://localhost:16686
    - Spans
    - Tags
    - Logs
-   - Tempo de execução
+   - Tempo de execução 

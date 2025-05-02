@@ -1,4 +1,4 @@
-# Laboratório: Kubernetes Dashboard e Aplicação httpbin
+# Laboratório Atualizado: Kubernetes Dashboard e Aplicação httpbin
 
 Este guia mostra como configurar e utilizar o Kubernetes Dashboard, uma interface gráfica para gerenciar seu cluster Kubernetes. Ele abrange:
 - Criação de um cluster Kind
@@ -6,7 +6,7 @@ Este guia mostra como configurar e utilizar o Kubernetes Dashboard, uma interfac
 - Configuração de uma conta de serviço com permissões administrativas
 - Implantação de uma aplicação httpbin
 
-✅ **Atualizado: Aula 5**
+✅ **Data da Atualização: 7 de Abril de 2025**
 
 ---
 
@@ -90,4 +90,4 @@ Navegue até os recursos do Kubernetes Dashboard para visualizar o httpbin que f
 - Deployments
 - Pods
 - Services
-- Outros recursos associados
+- Outros recursos associados 
