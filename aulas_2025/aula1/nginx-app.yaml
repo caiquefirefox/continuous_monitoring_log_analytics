@@ -4,7 +4,7 @@ metadata:
   name: nginx-deployment
   namespace: aula1
 spec:
-  replicas: 2
+  replicas: 12
   selector:
     matchLabels:
       app: nginx

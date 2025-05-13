@@ -4,72 +4,23 @@ Este laboratório demonstra rapidamente como configurar o Zabbix e criar um aler
 
 ## Passo 1: Configuração do ambiente
 
-Crie um arquivo `docker-compose.yml` com o seguinte conteúdo:
-
-```yaml
-version: '3'
-
-services:
-  zabbix-db:
-    image: mysql:8.0
-    restart: always
-    environment:
-      MYSQL_DATABASE: zabbix
-      MYSQL_USER: zabbix
-      MYSQL_PASSWORD: zabbix
-      MYSQL_ROOT_PASSWORD: zabbix_root_pwd
-    volumes:
-      - mysql-data:/var/lib/mysql
-    command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8 --collation-server=utf8_bin
-
-  zabbix-server:
-    image: zabbix/zabbix-server-mysql:ubuntu-6.0-latest
-    restart: always
-    ports:
-      - "10051:10051"
-    environment:
-      DB_SERVER_HOST: zabbix-db
-      MYSQL_DATABASE: zabbix
-      MYSQL_USER: zabbix
-      MYSQL_PASSWORD: zabbix
-    depends_on:
-      - zabbix-db
-
-  zabbix-web:
-    image: zabbix/zabbix-web-nginx-mysql:ubuntu-6.0-latest
-    restart: always
-    ports:
-      - "8080:8080"
-    environment:
-      DB_SERVER_HOST: zabbix-db
-      MYSQL_DATABASE: zabbix
-      MYSQL_USER: zabbix
-      MYSQL_PASSWORD: zabbix
-      ZBX_SERVER_HOST: zabbix-server
-      PHP_TZ: America/Sao_Paulo
-    depends_on:
-      - zabbix-db
-      - zabbix-server
-
-  zabbix-agent:
-    image: zabbix/zabbix-agent2:ubuntu-6.0-latest
-    restart: always
-    privileged: true
-    environment:
-      ZBX_HOSTNAME: "Lab-Docker-Agent"
-      ZBX_SERVER_HOST: zabbix-server
-    depends_on:
-      - zabbix-server
-
-volumes:
-  mysql-data:
-```
-
-Execute o ambiente Docker:
+O arquivo `docker-compose.yml` já está configurado. Execute:
 
 ```bash
+# Primeiro, limpe qualquer instalação anterior
+docker-compose down -v
+
+# Inicie os containers
 docker-compose up -d
 ```
+
+Aguarde aproximadamente 1-2 minutos para que todos os serviços iniciem corretamente. Você pode verificar o status dos containers com:
+
+```bash
+docker ps
+```
+
+Todos os 4 containers (zabbix-db, zabbix-server, zabbix-web e zabbix-agent) devem estar em execução.
 
 ## Passo 2: Acesse o Zabbix
 
@@ -78,15 +29,54 @@ docker-compose up -d
 
 ## Passo 3: Configure um host
 
+### Se você precisa editar um host existente:
+
+1. Vá para **Configuration** → **Hosts**
+2. Localize o host existente (pode estar com nome "zabbix-server" ou outro nome)
+3. Clique no nome do host para editar
+4. Corrija as configurações:
+   - Host name: Altere para `Lab-Docker-Agent` (exatamente como escrito aqui)
+   - Remova qualquer interface configurada incorretamente (especialmente se estiver usando 127.0.0.1)
+   - Adicione uma nova interface Agent (ou edite a existente):
+     - Tipo: Agent
+     - IP: Use `zabbix-agent` (nome do serviço) ou obtenha o IP do container com:
+       ```bash
+       docker inspect aula2-zabbix-agent-1 | grep IPAddress
+       ```
+     - Porta: `10050`
+     - Importante: Marque a opção "Connect to" como DNS se usar o nome do serviço, ou IP se usar o endereço IP
+   - Verifique se os templates apropriados estão aplicados (veja a seção "Para criar um novo host" abaixo)
+5. Clique em **Update** para salvar as alterações
+
+### Para criar um novo host:
+
 1. Vá para **Configuration** → **Hosts**
 2. Clique em **Create host**
 3. Configure:
    - Host name: `Lab-Docker-Agent`
+   - Visible name: `Lab-Docker-Agent` (opcional)
    - Groups: Selecione `Linux servers`
-   - Interfaces: Tipo Agent, IP `zabbix-agent`, porta `10050`
-4. Vá para a aba **Templates**
-5. Adicione o template `Linux by Zabbix agent`
-6. Clique em **Add**
+
+4. É necessário adicionar uma interface Agent clicando no botão **Add** na seção "Interfaces":
+   - Tipo: Agent
+   - IP: Use `zabbix-agent` (nome do serviço) ou obtenha o IP do container com:
+     ```bash
+     docker inspect aula2-zabbix-agent-1 | grep IPAddress
+     ```
+   - Porta: `10050`
+   - Importante: Marque a opção "Connect to" como DNS se usar o nome do serviço, ou IP se usar o endereço IP
+   - Mantenha a opção "Default" selecionada
+   - Clique em "Add" para adicionar a interface
+
+5. Ainda na mesma tela de criação do host, vá para a aba **Templates** (que aparece na parte superior do formulário)
+6. No campo de busca de templates, digite `Linux by Zabbix agent` e selecione este template quando aparecer
+7. Clique no botão **Add** no final da página para salvar toda a configuração do host
+
+8. **Verificação**: Após adicionar ou editar o host, aguarde 1-2 minutos e depois:
+   - Vá para **Monitoring** → **Latest data**
+   - Filtre por host: `Lab-Docker-Agent`
+   - Você deverá ver dados como uso de CPU, memória, etc. chegando do agente
+   - Se o status da interface do agente estiver como "Unknown", aguarde mais alguns minutos
 
 ## Passo 4: Crie um alerta simples
 
@@ -104,18 +94,33 @@ docker-compose up -d
 7. Configure:
    - Name: `CPU alta em {HOST.NAME}`
    - Severity: `Warning`
-   - Expression: `{Lab-Docker-Agent:system.cpu.util[,user].last()}>20`
-8. Clique em **Add**
+   - Expressão: Digite diretamente no campo expression:
+     ```
+     last(/Lab-Docker-Agent/system.cpu.util[,user])>20
+     ```
+8. Clique em **Add** para salvar o trigger
 
 ## Passo 5: Teste o alerta
 
-Execute no terminal:
+**Nota importante**: O template "Linux by Zabbix agent" já vem com alguns alertas pré-configurados, como o alerta de uso de swap. É normal ver um alerta como "High swap space usage" mesmo sem realizar testes adicionais.
+
+### Método 1: Usando o container do agente
+Se possível, execute no terminal:
 
 ```bash
-docker-compose exec zabbix-agent bash -c "apt-get update && apt-get install -y stress && stress -c 2 -t 60"
+# Usando o nome exato do container, não o serviço
+docker exec -it aula2-zabbix-agent-1 bash -c "apt-get update && apt-get install -y stress && stress -c 2 -t 60"
 ```
 
-Vá para **Monitoring** → **Problems** para ver o alerta aparecer.
+### Método 2: Alternativa no host (se o método 1 falhar)
+Se o método 1 não funcionar, execute este comando diretamente no host para gerar carga de CPU:
+
+```bash
+# Gera carga de CPU por 60 segundos
+for i in {1..8}; do yes > /dev/null & done; sleep 60; pkill yes
+```
+
+Vá para **Monitoring** → **Problems** para ver o alerta aparecer. Você provavelmente verá alertas relacionados à CPU ou outros recursos, como o de uso de swap.
 
 ## Passo 6: Encerre o ambiente
 
@@ -123,4 +128,59 @@ Quando terminar:
 
 ```bash
 docker-compose down
-``` 
+```
+
+Para remover também os volumes persistentes (apaga todos os dados):
+
+```bash
+docker-compose down -v
+```
+
+## Solução de problemas
+
+Se você encontrar algum problema, tente:
+
+1. Verificar se todos os containers estão rodando:
+   ```bash
+   docker ps
+   ```
+
+2. Verificar os logs dos containers:
+   ```bash
+   docker-compose logs zabbix-server
+   docker-compose logs zabbix-agent
+   ```
+
+3. Testar a comunicação entre o servidor e o agente:
+   ```bash
+   # Testando com o nome do serviço (DNS)
+   docker exec -it aula2-zabbix-server-1 zabbix_get -s zabbix-agent -p 10050 -k agent.ping
+   
+   # Ou com o IP do agente
+   IP_AGENTE=$(docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' aula2-zabbix-agent-1)
+   docker exec -it aula2-zabbix-server-1 zabbix_get -s $IP_AGENTE -p 10050 -k agent.ping
+   ```
+   
+   O resultado deve ser: `1`
+
+4. Verificar as portas expostas:
+   ```bash
+   docker-compose ps
+   ```
+   
+   Confirme que as portas 8080 (web) e 10050 (agent) estão mapeadas corretamente.
+
+5. Reiniciar os containers:
+   ```bash
+   docker-compose down
+   docker-compose up -d
+   ```
+
+6. Importante: Se você estiver enfrentando problemas com comandos docker-compose, tente usar o nome completo do container em vez do serviço:
+   ```bash
+   # Em vez de:
+   docker-compose exec zabbix-agent comando
+   
+   # Use:
+   docker exec -it aula2-zabbix-agent-1 comando
+   ``` 
