@@ -12,7 +12,7 @@ wget https://raw.githubusercontent.com/able2cloud/continuous_monitoring_log_anal
 docker-compose down -v
 
 # Inicie os containers
-docker-compose up -d
+docker compose up -d
 ```
 
 Aguarde aproximadamente 1-2 minutos para que todos os serviços iniciem corretamente. Você pode verificar o status dos containers com:
