@@ -15,7 +15,7 @@ Este guia mostra como configurar e utilizar o Kubernetes Dashboard, uma interfac
 ### 1.1. Criar Cluster Kind
 ```bash
 # Criar o Cluster com Kind
-kind create cluster --name aula5
+kind create cluster --config kind-config.yaml
 
 # Verificar o cluster
 kubectl get nodes
@@ -91,3 +91,15 @@ Navegue até os recursos do Kubernetes Dashboard para visualizar o httpbin que f
 - Pods
 - Services
 - Outros recursos associados 
+
+---
+
+## 6. Limpeza dos Recursos
+```bash
+# Para limpar os recursos:
+kubectl delete -f https://raw.githubusercontent.com/able2cloud/continuous_monitoring_log_analytics/main/aulas_2024/aula5/httpbinfull.yaml
+kubectl delete -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.7.0/aio/deploy/recommended.yaml
+kubectl delete -f dashboard-admin-sa-token.yaml
+
+kind delete cluster --name aulafive
+``` 

@@ -16,7 +16,7 @@ Este guia demonstra como configurar e utilizar o Prometheus e Grafana para monit
 ### 1.1. Criar Cluster Kind
 ```bash
 # Crie um cluster no KIND
-kind create cluster --name aula4
+kind create cluster --config kind-config.yaml
 ```
 
 ### 1.2. Instalar o Metrics Server
@@ -147,5 +147,5 @@ kubectl exec -it ab-stress -- ab -n 10000 -c 100 http://httpbin-service:80/get
 # Para limpar os recursos:
 helm delete prometheus
 
-kind delete cluster --name aula4
+kind delete cluster --name aulathree
 ``` 

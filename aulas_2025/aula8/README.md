@@ -15,16 +15,10 @@ Este guia demonstra como configurar e utilizar o Ingress NGINX no Kubernetes. El
 ### 1.1. Criar Cluster Kind
 ```bash
 # Criar um cluster Kind
-kind create cluster --name ingress-lab
+kind create cluster --config kind-config.yaml
 
 # Verificar o cluster
 kubectl get nodes
-```
-
-### 1.2. Configurar o Node para Ingress
-```bash
-kubectl label node ingress-lab-control-plane ingress-ready=true
-kubectl label node ingress-lab-control-plane kubernetes.io/os=linux
 ```
 
 ---
@@ -115,4 +109,17 @@ kubectl logs -n ingress-nginx --tail 10 -l app.kubernetes.io/name=ingress-nginx
 
 # Verificar os eventos
 kubectl get events --namespace ingress-nginx
+```
+
+---
+
+## 7. Limpeza dos Recursos
+```bash
+# Para limpar os recursos:
+kubectl delete -f ingress.yaml
+kubectl delete service hello-world
+kubectl delete deployment hello-world
+kubectl delete -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
+
+kind delete cluster --name ingress-lab
 ``` 
