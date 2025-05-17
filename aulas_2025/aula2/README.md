@@ -5,6 +5,7 @@ Este laboratório demonstra rapidamente como configurar o Zabbix e criar um aler
 ## Passo 1: Configuração do ambiente
 
 O arquivo `docker-compose.yml` já está configurado. Execute:
+wget https://raw.githubusercontent.com/able2cloud/continuous_monitoring_log_analytics/refs/heads/main/aulas_2025/aula2/docker-compose.yml
 
 ```bash
 # Primeiro, limpe qualquer instalação anterior
