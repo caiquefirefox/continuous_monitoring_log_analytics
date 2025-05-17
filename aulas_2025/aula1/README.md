@@ -165,6 +165,9 @@ helm version
 ---
 
 ## 3. Criação e Interação com o Cluster Kind
+# baixe os arquivos de configuração
+wget https://raw.githubusercontent.com/able2cloud/continuous_monitoring_log_analytics/refs/heads/main/aulas_2025/aula1/kind-config.yaml
+wget https://github.com/able2cloud/continuous_monitoring_log_analytics/blob/main/aulas_2025/aula1/nginx-app.yaml
 
 ### 3.1. Criar o Cluster
 ```bash
