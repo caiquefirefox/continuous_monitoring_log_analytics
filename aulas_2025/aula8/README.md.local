@@ -40,11 +40,9 @@ kubectl get pods -n ingress-nginx --watch
 
 ### 3.1. Criar um Deployment e um Serviço
 ```bash
-# Criar um deployment
+# Criar um deployment e um serviço
 kubectl create deployment hello-world --image=gcr.io/google-samples/hello-app:1.0
-
-# Criar o serviço NodePort
-kubectl apply -f hello-world-nodeport.yaml
+kubectl expose deployment hello-world --port=8080 --target-port=8080
 
 # Verificar os serviços
 kubectl get svc
@@ -94,14 +92,9 @@ kubectl apply -f ingress.yaml
 sed -i '$ a\127.0.0.1 hello-world.local' /etc/hosts
 ```
 
-### 5.2. Testar o Acesso
+### 5.2. Testar o Acesso via Ingress
 ```bash
-# Testar o acesso via NodePort
-kubectl get svc hello-world -o jsonpath='{.spec.ports[0].nodePort}'
-# Use o número da porta retornado acima para acessar a aplicação
-# Exemplo: http://<IP_PUBLICO_DA_EC2>:<PORTA>
-
-# Testar o acesso via Ingress
+# Testar o acesso via Ingress usando curl
 curl http://hello-world.local
 ```
 
@@ -124,7 +117,7 @@ kubectl get events --namespace ingress-nginx
 ```bash
 # Para limpar os recursos:
 kubectl delete -f ingress.yaml
-kubectl delete -f hello-world-nodeport.yaml
+kubectl delete service hello-world
 kubectl delete deployment hello-world
 kubectl delete -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
 

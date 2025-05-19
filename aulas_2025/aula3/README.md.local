@@ -52,9 +52,7 @@ kubectl --namespace default get pods -l "release=prometheus"
 ### 3.1. Acessar o Prometheus
 ```bash
 # Acessando o Prometheus:
-kubectl get svc prometheus-kube-prometheus-prometheus -o jsonpath='{.spec.ports[0].nodePort}'
-# Use o número da porta retornado acima para acessar o Prometheus
-# Exemplo: http://<IP_PUBLICO_DA_EC2>:<PORTA>
+kubectl port-forward --address 0.0.0.0 svc/prometheus-kube-prometheus-prometheus 9090:9090
 ```
 
 ### 3.2. Exemplos de Consultas PromQL
@@ -86,10 +84,10 @@ kubectl get secret --namespace default prometheus-grafana -o jsonpath="{.data.ad
 
 ### 4.2. Acessar o Grafana
 ```bash
-# Obter a porta do serviço Grafana
-kubectl get svc prometheus-grafana -o jsonpath='{.spec.ports[0].nodePort}'
-# Use o número da porta retornado acima para acessar o Grafana
-# Exemplo: http://<IP_PUBLICO_DA_EC2>:<PORTA>
+# Inicie o port-forward para acessar o Grafana
+kubectl port-forward svc/prometheus-grafana 3000:80
+
+# Faça login no Grafana:
 # Usuário: admin
 # Senha: (resultado do comando anterior)
 ```
@@ -124,8 +122,8 @@ kubectl get svc prometheus-grafana -o jsonpath='{.spec.ports[0].nodePort}'
 # Implantar o httpbin
 kubectl apply -f https://raw.githubusercontent.com/able2cloud/continuous_monitoring_log_analytics/main/aulas_2024/aula3/deploymentexample.yaml
 
-# Suba o service NodePort:
-kubectl apply -f servicehttpbin-nodeport.yaml
+# Suba o service:
+kubectl apply -f https://raw.githubusercontent.com/able2cloud/continuous_monitoring_log_analytics/main/aulas_2024/aula3/servicehttpbin.yaml
 
 # Suba o pod de stress test
 kubectl apply -f https://raw.githubusercontent.com/able2cloud/continuous_monitoring_log_analytics/main/aulas_2024/aula3/pod.yaml
@@ -136,13 +134,8 @@ kubectl apply -f https://raw.githubusercontent.com/able2cloud/continuous_monitor
 
 ### 5.2. Executar Teste de Carga
 ```bash
-# Obter a porta do serviço httpbin
-kubectl get svc httpbin-service -o jsonpath='{.spec.ports[0].nodePort}'
-# Use o número da porta retornado acima para o teste de carga
-# Exemplo: http://<IP_PUBLICO_DA_EC2>:<PORTA>
-
 # Comando stress test
-kubectl exec -it ab-stress -- ab -n 10000 -c 100 http://<IP_PUBLICO_DA_EC2>:<PORTA>/get
+kubectl exec -it ab-stress -- ab -n 10000 -c 100 http://httpbin-service:80/get
 
 # Observe os dashboards no Grafana para monitorar o comportamento do sistema durante o teste
 ```
@@ -153,10 +146,6 @@ kubectl exec -it ab-stress -- ab -n 10000 -c 100 http://<IP_PUBLICO_DA_EC2>:<POR
 ```bash
 # Para limpar os recursos:
 helm delete prometheus
-kubectl delete -f servicehttpbin-nodeport.yaml
-kubectl delete -f https://raw.githubusercontent.com/able2cloud/continuous_monitoring_log_analytics/main/aulas_2024/aula3/deploymentexample.yaml
-kubectl delete -f https://raw.githubusercontent.com/able2cloud/continuous_monitoring_log_analytics/main/aulas_2024/aula3/pod.yaml
-kubectl delete -f https://raw.githubusercontent.com/able2cloud/continuous_monitoring_log_analytics/main/aulas_2024/aula3/hpa-full.yaml
 
 kind delete cluster --name aulathree
 ``` 

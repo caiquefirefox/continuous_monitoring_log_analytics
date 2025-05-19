@@ -29,9 +29,12 @@ kubectl get nodes
 ```bash
 # Instalar o Kubernetes Dashboard
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.7.0/aio/deploy/recommended.yaml
+```
 
-# Criar o serviço NodePort para o Dashboard
-kubectl apply -f kubernetes-dashboard-nodeport.yaml
+### 2.2. Configurar o Node para o Ingress
+```bash
+kubectl label node ingress-lab-control-plane ingress-ready=true
+kubectl label node ingress-lab-control-plane kubernetes.io/os=linux
 ```
 
 ---
@@ -61,16 +64,14 @@ kubectl describe secret dashboard-admin-sa-token -n default
 
 ## 4. Acessar o Dashboard
 
-### 4.1. Obter a Porta do Dashboard
+### 4.1. Configurar Port-Forward
 ```bash
-# Obter a porta do serviço Dashboard
-kubectl get svc kubernetes-dashboard-nodeport -n kubernetes-dashboard -o jsonpath='{.spec.ports[0].nodePort}'
-# Use o número da porta retornado acima para acessar o Dashboard
-# Exemplo: https://<IP_PUBLICO_DA_EC2>:<PORTA>
+# Fazer o Port-Forward para Acessar o Dashboard
+kubectl port-forward svc/kubernetes-dashboard -n kubernetes-dashboard 8001:443
 ```
 
 ### 4.2. Passos para Acessar pelo Navegador
-1. Abra seu navegador e acesse a URL: https://<IP_PUBLICO_DA_EC2>:<PORTA>/
+1. Abra seu navegador e acesse a URL: https://localhost:8001/
 2. Quando a página de login do Kubernetes Dashboard aparecer, selecione a opção Token e cole o token obtido anteriormente.
 3. Clique em Sign In.
 
@@ -82,11 +83,6 @@ kubectl get svc kubernetes-dashboard-nodeport -n kubernetes-dashboard -o jsonpat
 ```bash
 # Criar o httpbin
 kubectl apply -f https://raw.githubusercontent.com/able2cloud/continuous_monitoring_log_analytics/main/aulas_2024/aula5/httpbinfull.yaml
-
-# Verificar a porta do serviço httpbin
-kubectl get svc httpbin-service -o jsonpath='{.spec.ports[0].nodePort}'
-# Use o número da porta retornado acima para acessar o httpbin
-# Exemplo: http://<IP_PUBLICO_DA_EC2>:<PORTA>
 ```
 
 ### 5.2. Verificar no Dashboard
@@ -102,7 +98,6 @@ Navegue até os recursos do Kubernetes Dashboard para visualizar o httpbin que f
 ```bash
 # Para limpar os recursos:
 kubectl delete -f https://raw.githubusercontent.com/able2cloud/continuous_monitoring_log_analytics/main/aulas_2024/aula5/httpbinfull.yaml
-kubectl delete -f kubernetes-dashboard-nodeport.yaml
 kubectl delete -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.7.0/aio/deploy/recommended.yaml
 kubectl delete -f dashboard-admin-sa-token.yaml
 
