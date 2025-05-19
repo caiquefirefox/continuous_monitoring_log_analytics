@@ -21,7 +21,6 @@ kind create cluster --config kind-config.yaml
 
 ### 1.2. Instalar o Metrics Server
 ```bash
-wget https://raw.githubusercontent.com/able2cloud/continuous_monitoring_log_analytics/main/aulas_2024/aula3/metricserverfull.yaml
 kubectl apply -f metricserverfull.yaml
 ```
 
@@ -122,16 +121,16 @@ kubectl get svc prometheus-grafana -o jsonpath='{.spec.ports[0].nodePort}'
 ### 5.1. Implantar httpbin e Configurar HPA
 ```bash
 # Implantar o httpbin
-kubectl apply -f https://raw.githubusercontent.com/able2cloud/continuous_monitoring_log_analytics/main/aulas_2024/aula3/deploymentexample.yaml
+kubectl apply -f deploymentexample.yaml
 
 # Suba o service NodePort:
 kubectl apply -f servicehttpbin-nodeport.yaml
 
 # Suba o pod de stress test
-kubectl apply -f https://raw.githubusercontent.com/able2cloud/continuous_monitoring_log_analytics/main/aulas_2024/aula3/pod.yaml
+kubectl apply -f pod.yaml
 
 # Suba o HPA
-kubectl apply -f https://raw.githubusercontent.com/able2cloud/continuous_monitoring_log_analytics/main/aulas_2024/aula3/hpa-full.yaml
+kubectl apply -f hpa-full.yaml
 ```
 
 ### 5.2. Executar Teste de Carga
@@ -154,9 +153,9 @@ kubectl exec -it ab-stress -- ab -n 10000 -c 100 http://<IP_PUBLICO_DA_EC2>:<POR
 # Para limpar os recursos:
 helm delete prometheus
 kubectl delete -f servicehttpbin-nodeport.yaml
-kubectl delete -f https://raw.githubusercontent.com/able2cloud/continuous_monitoring_log_analytics/main/aulas_2024/aula3/deploymentexample.yaml
-kubectl delete -f https://raw.githubusercontent.com/able2cloud/continuous_monitoring_log_analytics/main/aulas_2024/aula3/pod.yaml
-kubectl delete -f https://raw.githubusercontent.com/able2cloud/continuous_monitoring_log_analytics/main/aulas_2024/aula3/hpa-full.yaml
+kubectl delete -f deploymentexample.yaml
+kubectl delete -f pod.yaml
+kubectl delete -f hpa-full.yaml
 
 kind delete cluster --name aulathree
 ``` 

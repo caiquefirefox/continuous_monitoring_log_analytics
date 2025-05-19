@@ -47,9 +47,6 @@ kubectl create clusterrolebinding dashboard-admin-sa --clusterrole=cluster-admin
 
 ### 3.2. Configurar Token de Acesso
 ```bash
-# Baixar o arquivo dashboard-admin-sa-token.yaml
-wget https://raw.githubusercontent.com/able2cloud/continuous_monitoring_log_analytics/main/aulas_2024/aula5/dashboard-admin-sa-token.yaml
-
 # Criar o token
 kubectl apply -f dashboard-admin-sa-token.yaml
 
@@ -81,7 +78,7 @@ kubectl get svc kubernetes-dashboard-nodeport -n kubernetes-dashboard -o jsonpat
 ### 5.1. Criar o Deployment e Serviço
 ```bash
 # Criar o httpbin
-kubectl apply -f https://raw.githubusercontent.com/able2cloud/continuous_monitoring_log_analytics/main/aulas_2024/aula5/httpbinfull.yaml
+kubectl apply -f httpbinfull.yaml
 
 # Verificar a porta do serviço httpbin
 kubectl get svc httpbin-service -o jsonpath='{.spec.ports[0].nodePort}'
@@ -101,7 +98,7 @@ Navegue até os recursos do Kubernetes Dashboard para visualizar o httpbin que f
 ## 6. Limpeza dos Recursos
 ```bash
 # Para limpar os recursos:
-kubectl delete -f https://raw.githubusercontent.com/able2cloud/continuous_monitoring_log_analytics/main/aulas_2024/aula5/httpbinfull.yaml
+kubectl delete -f httpbinfull.yaml
 kubectl delete -f kubernetes-dashboard-nodeport.yaml
 kubectl delete -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.7.0/aio/deploy/recommended.yaml
 kubectl delete -f dashboard-admin-sa-token.yaml
