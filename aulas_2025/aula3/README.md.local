@@ -21,8 +21,7 @@ kind create cluster --config kind-config.yaml
 
 ### 1.2. Instalar o Metrics Server
 ```bash
-wget https://raw.githubusercontent.com/able2cloud/continuous_monitoring_log_analytics/main/aulas_2024/aula3/metricserverfull.yaml
-kubectl apply -f metricserverfull.yaml
+kubectl apply -f https://raw.githubusercontent.com/able2cloud/continuous_monitoring_log_analytics/main/aulas_2025/aula3/metricserverfull.yaml
 ```
 
 ---
@@ -120,16 +119,16 @@ kubectl port-forward svc/prometheus-grafana 3000:80
 ### 5.1. Implantar httpbin e Configurar HPA
 ```bash
 # Implantar o httpbin
-kubectl apply -f https://raw.githubusercontent.com/able2cloud/continuous_monitoring_log_analytics/main/aulas_2024/aula3/deploymentexample.yaml
+kubectl apply -f https://raw.githubusercontent.com/able2cloud/continuous_monitoring_log_analytics/main/aulas_2025/aula3/deploymentexample.yaml
 
 # Suba o service:
-kubectl apply -f https://raw.githubusercontent.com/able2cloud/continuous_monitoring_log_analytics/main/aulas_2024/aula3/servicehttpbin.yaml
+kubectl apply -f https://raw.githubusercontent.com/able2cloud/continuous_monitoring_log_analytics/main/aulas_2025/aula3/servicehttpbin.yaml
 
 # Suba o pod de stress test
-kubectl apply -f https://raw.githubusercontent.com/able2cloud/continuous_monitoring_log_analytics/main/aulas_2024/aula3/pod.yaml
+kubectl apply -f https://raw.githubusercontent.com/able2cloud/continuous_monitoring_log_analytics/main/aulas_2025/aula3/pod.yaml
 
 # Suba o HPA
-kubectl apply -f https://raw.githubusercontent.com/able2cloud/continuous_monitoring_log_analytics/main/aulas_2024/aula3/hpa-full.yaml
+kubectl apply -f https://raw.githubusercontent.com/able2cloud/continuous_monitoring_log_analytics/main/aulas_2025/aula3/hpa-full.yaml
 ```
 
 ### 5.2. Executar Teste de Carga
@@ -146,6 +145,10 @@ kubectl exec -it ab-stress -- ab -n 10000 -c 100 http://httpbin-service:80/get
 ```bash
 # Para limpar os recursos:
 helm delete prometheus
+kubectl delete -f https://raw.githubusercontent.com/able2cloud/continuous_monitoring_log_analytics/main/aulas_2025/aula3/servicehttpbin.yaml
+kubectl delete -f https://raw.githubusercontent.com/able2cloud/continuous_monitoring_log_analytics/main/aulas_2025/aula3/deploymentexample.yaml
+kubectl delete -f https://raw.githubusercontent.com/able2cloud/continuous_monitoring_log_analytics/main/aulas_2025/aula3/pod.yaml
+kubectl delete -f https://raw.githubusercontent.com/able2cloud/continuous_monitoring_log_analytics/main/aulas_2025/aula3/hpa-full.yaml
 
 kind delete cluster --name aulathree
 ``` 
