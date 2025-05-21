@@ -1,5 +1,22 @@
 # Laboratório Atualizado: Monitoramento com Prometheus e Grafana no Kubernetes
 
+## Objetivo do Laboratório
+
+Este laboratório prático apresenta um sistema completo de monitoramento para clusters Kubernetes, integrando diversas ferramentas essenciais para observabilidade e elasticidade de aplicações em ambiente de produção:
+
+- **Prometheus** - Sistema de monitoramento que coleta e armazena métricas como séries temporais
+- **Grafana** - Plataforma de visualização que transforma os dados do Prometheus em dashboards interativos
+- **Metrics Server** - Coletor de métricas que alimenta tanto o monitoramento quanto o escalonamento automático
+- **HPA (Horizontal Pod Autoscaler)** - Demonstra como escalar automaticamente aplicações baseado em métricas de utilização
+- **Kind** - Cria um cluster Kubernetes em containers locais para fins de laboratório
+- **Helm** - Gerenciador de pacotes que simplifica a instalação de aplicações complexas como o Prometheus
+
+Ao final deste laboratório, você será capaz de:
+1. Configurar um sistema de monitoramento completo em Kubernetes
+2. Visualizar métricas de cluster, nodes e aplicações em dashboards interativos
+3. Implementar escalonamento automático baseado em métricas
+4. Executar testes de carga e observar o comportamento do sistema em tempo real
+
 Este guia demonstra como configurar e utilizar o Prometheus e Grafana para monitoramento em um cluster Kubernetes. Ele abrange:
 - Criação de um cluster Kind
 - Instalação do Metrics Server
@@ -216,19 +233,65 @@ kubectl port-forward svc/prometheus-grafana 3000:80
 4. Insira a URL: `http://prometheus-kube-prometheus-prometheus:9090`.
 5. Clique em "Save & Test".
 
-### 4.4. Importar Dashboards
-1. No menu lateral esquerdo, clique em "Dashboards" > "new".
-2. Clique em "Import".
-3. Para importar um dashboard, digite o ID:
-   - **ID 315:** Kubernetes cluster monitoring (por CoreOS).
-   - **ID 12740:** Kubernetes Monitoring (por Bitnami).
-4. Clique em "Load", selecione o data source "Prometheus" e clique em "Import".
+### 4.4. Dashboards do Grafana
 
-### 4.5. Visualizar Dashboards
-1. No menu lateral esquerdo, clique em "Dashboards" > "Manage" para abrir a lista de todos os dashboards disponíveis.
-2. Escolha o Dashboard Importado e clique para abri-lo.
-3. Visualize os gráficos e painéis pré-configurados para monitorar os diferentes aspectos do seu cluster Kubernetes.
-4. Verifique se as consultas PromQL estão retornando os dados esperados.
+#### 4.4.1. Visualizar Dashboards Pré-instalados (Recomendado para iniciantes)
+O Prometheus Operator já instala automaticamente um conjunto completo de dashboards para monitoramento do Kubernetes:
+
+1. No menu lateral esquerdo, clique em "Dashboards" (ícone de quatro quadrados).
+2. Clique em "Browse" (ou em "Browsable" na barra lateral).
+3. Procure por dashboards que começam com "Kubernetes / ":
+   - **Kubernetes / Compute Resources / Cluster**: Visão geral do uso de recursos do cluster
+   - **Kubernetes / Compute Resources / Namespace**: Uso de recursos por namespace
+   - **Kubernetes / Compute Resources / Node**: Uso de recursos por nó
+   - **Kubernetes / Compute Resources / Pod**: Uso de recursos por pod
+   - **Kubernetes / Compute Resources / Workload**: Uso de recursos por workload
+   - **Kubernetes / Networking**: Métricas de rede por cluster, pods, namespaces, etc.
+4. Clique em qualquer um desses dashboards para explorar as métricas já disponíveis.
+
+**Dica**: Se os dashboards padrão não aparecerem, aguarde alguns minutos para que o Prometheus colete dados suficientes. Certifique-se de que todos os pods do Prometheus e Grafana estão em estado "Running" (execute `kubectl get pods`).
+
+#### 4.4.2. Importar Dashboards Adicionais (Opcional)
+Se quiser explorar dashboards alternativos criados pela comunidade:
+
+1. No menu lateral esquerdo, clique em "Dashboards" (ícone de quatro quadrados).
+2. Clique em "+ Import" no topo da página.
+3. Na tela de importação, você verá várias opções:
+   - Na seção "Import via grafana.com", digite um dos seguintes IDs:
+     - **ID 315:** Kubernetes cluster monitoring (por CoreOS).
+     - **ID 12740:** Kubernetes Monitoring (por Bitnami).
+   - Clique no botão "Load".
+4. Na próxima tela, você verá configurações do dashboard:
+   - Na seção "Prometheus", selecione sua fonte de dados Prometheus no menu dropdown.
+   - **IMPORTANTE:** Esta seleção da fonte de dados é obrigatória para o dashboard funcionar.
+   - Se houver outros campos de seleção, mantenha os valores padrão.
+5. Clique no botão "Import" na parte inferior da tela.
+6. O dashboard será importado e mostrado automaticamente.
+
+### 4.5. Analisando os Dashboards do Kubernetes
+
+Para extrair o máximo dos dashboards:
+
+1. Na parte superior direita de qualquer dashboard, ajuste o intervalo de tempo para "Last 15 minutes" para ver dados recentes.
+
+2. Principais painéis para verificar em "Kubernetes / Compute Resources / Cluster":
+   - **CPU Usage**: Mostra o uso de CPU por namespace (deve mostrar o namespace padrão/default)
+   - **Memory Usage**: Mostra o uso de memória por namespace
+   - **CPU Quota**: Mostra o uso vs. limites de CPU (útil para identificar pods throttled)
+   - **Memory Quota**: Mostra o uso vs. limites de memória (útil para identificar pods com risco de OOM)
+
+3. Em "Kubernetes / Compute Resources / Pod", você pode:
+   - Filtrar por namespace (canto superior esquerdo)
+   - Ver métricas detalhadas de CPU e memória por pod
+   - Identificar pods com alta utilização de recursos
+
+4. Para análise de rede, use os dashboards "Kubernetes / Networking".
+
+**Solução de Problemas:**
+- **Dashboard vazio ou sem dados?** Verifique se os pods do Prometheus e coletor de métricas estão rodando: `kubectl get pods -A | grep -E 'prometheus|metrics'`
+- **Métricas parciais?** Algumas métricas levam mais tempo para aparecer. Aguarde pelo menos 5 minutos após a instalação.
+- **Erro na fonte de dados?** Verifique a configuração da fonte de dados em Configuration > Data Sources.
+- **Port-forward parou?** Se você fechou o terminal com port-forward, reinicie-o com o comando da seção 4.2.
 
 ---
 
