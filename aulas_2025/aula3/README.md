@@ -138,22 +138,47 @@ kubectl get svc prometheus-kube-prometheus-prometheus -o jsonpath='{.spec.ports[
 ```
 
 ### 3.2. Exemplos de Consultas PromQL
+
+Depois de acessar a interface do Prometheus no navegador, siga estes passos para executar consultas:
+
+1. Na parte superior da interface, localize a barra de consulta longa
+2. Cole uma das consultas abaixo na barra
+3. Clique no botão azul "Execute" à direita da barra
+4. Veja o resultado em formato tabela ou clique na aba "Graph" para visualizar em gráfico
+5. Para gráficos, ajuste o intervalo de tempo no canto superior direito (1h, 6h, etc.)
+
+**Consultas básicas para testar (em ordem crescente de complexidade):**
+
 ```
-# Taxa de Requisições HTTP:
-sum(rate(http_requests_total[5m])) by (job)
+# Verifica quais targets estão sendo monitorados pelo Prometheus (deve ser o primeiro teste)
+up
 
-# Carga de CPU (timeseries):
-sum(rate(node_cpu_seconds_total{mode!="idle"}[5m])) by (instance)
-
-# Uso de Disco (percentual para cada nó):
-100 - (node_filesystem_avail_bytes{mountpoint="/"} * 100 / node_filesystem_size_bytes)
-
-# Número de Pods Rodando:
+# Conta quantos pods estão rodando no cluster
 count(kube_pod_info)
 
-# Status de Containers (rodando, esperando, etc.):
-count(kube_pod_container_status_running) or count(kube_pod_container_status_waiting) or count(kube_pod_container_status_terminated)
+# Lista todos os pods em execução com detalhes
+kube_pod_info
+
+# Mostra o status de todos os pods (Running, Pending, etc.)
+kube_pod_status_phase
+
+# Conta pods por namespace
+count(kube_pod_info) by (namespace)
+
+# Uso de CPU por pod (últimos 5 minutos)
+sum(rate(container_cpu_usage_seconds_total[5m])) by (pod)
+
+# Uso de memória por pod em bytes
+sum(container_memory_usage_bytes) by (pod)
+
+# Carga de CPU dos nodes (em porcentagem)
+(1 - avg(rate(node_cpu_seconds_total{mode="idle"}[5m])) by (instance)) * 100
 ```
+
+**Observações importantes:**
+- Algumas métricas podem não estar disponíveis imediatamente após a instalação
+- Para descobrir as métricas disponíveis, clique no botão "Insert metric at cursor" na barra de consulta
+- Para visualizar mudanças durante o teste de carga, use a aba "Graph" e defina um intervalo de tempo curto
 
 ---
 
