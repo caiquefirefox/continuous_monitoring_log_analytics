@@ -48,6 +48,12 @@ kind create cluster --config kind-config.yaml
 ### 1.3. Instalar o Metrics Server
 ```bash
 kubectl apply -f https://raw.githubusercontent.com/able2cloud/continuous_monitoring_log_analytics/main/aulas_2025/aula3/metricserverfull.yaml
+
+# Aguarde o Metrics Server subir completamente
+kubectl get pods -n kube-system | grep metrics-server
+
+# Verifique se o Metrics Server está funcionando corretamente
+kubectl top nodes
 ```
 
 ---
@@ -59,6 +65,9 @@ kubectl apply -f https://raw.githubusercontent.com/able2cloud/continuous_monitor
 # Adicione os repositórios do Helm para Prometheus e Grafana
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 helm repo update
+
+# Verifique se o repositório foi adicionado corretamente
+helm repo list
 ```
 
 ### 2.2. Instalar o Prometheus Operator
@@ -68,6 +77,9 @@ helm install prometheus prometheus-community/kube-prometheus-stack
 
 # Espere todos os componentes subirem antes de acessar o Grafana
 kubectl --namespace default get pods -l "release=prometheus"
+
+# Verifique se todos os pods estão em estado Running
+# Aguarde até que todos os pods estejam prontos (READY 1/1)
 ```
 
 ---
@@ -76,6 +88,9 @@ kubectl --namespace default get pods -l "release=prometheus"
 
 ### 3.1. Acessar o Prometheus
 ```bash
+# Verifique se o serviço do Prometheus está disponível
+kubectl get svc prometheus-kube-prometheus-prometheus
+
 # Acessando o Prometheus:
 kubectl get svc prometheus-kube-prometheus-prometheus -o jsonpath='{.spec.ports[0].nodePort}'
 # Use o número da porta retornado acima para acessar o Prometheus
@@ -149,18 +164,33 @@ kubectl get svc prometheus-grafana -o jsonpath='{.spec.ports[0].nodePort}'
 # Implantar o httpbin
 kubectl apply -f https://raw.githubusercontent.com/able2cloud/continuous_monitoring_log_analytics/main/aulas_2025/aula3/deploymentexample.yaml
 
+# Verifique se o deployment foi criado
+kubectl get deployments
+
 # Suba o service NodePort:
 kubectl apply -f https://raw.githubusercontent.com/able2cloud/continuous_monitoring_log_analytics/main/aulas_2025/aula3/servicehttpbin-nodeport.yaml
+
+# Verifique se o serviço está disponível
+kubectl get svc httpbin-service
 
 # Suba o pod de stress test
 kubectl apply -f https://raw.githubusercontent.com/able2cloud/continuous_monitoring_log_analytics/main/aulas_2025/aula3/pod.yaml
 
+# Aguarde o pod de stress test estar pronto
+kubectl get pods | grep ab-stress
+
 # Suba o HPA
 kubectl apply -f https://raw.githubusercontent.com/able2cloud/continuous_monitoring_log_analytics/main/aulas_2025/aula3/hpa-full.yaml
+
+# Verifique se o HPA foi criado
+kubectl get hpa
 ```
 
 ### 5.2. Executar Teste de Carga
 ```bash
+# Verifique se o pod de stress test está pronto antes de executar o teste
+kubectl get pods | grep ab-stress
+
 # Obter a porta do serviço httpbin
 kubectl get svc httpbin-service -o jsonpath='{.spec.ports[0].nodePort}'
 # Use o número da porta retornado acima para o teste de carga
@@ -168,6 +198,9 @@ kubectl get svc httpbin-service -o jsonpath='{.spec.ports[0].nodePort}'
 
 # Comando stress test
 kubectl exec -it ab-stress -- ab -n 10000 -c 100 http://<IP_PUBLICO_DA_EC2>:<PORTA>/get
+
+# Durante o teste, monitore o HPA em outro terminal
+kubectl get hpa -w
 
 # Observe os dashboards no Grafana para monitorar o comportamento do sistema durante o teste
 ```
