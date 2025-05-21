@@ -214,8 +214,7 @@ kubectl port-forward svc/prometheus-grafana 3000:80
 2. Clique em "Add data source".
 3. Escolha "Prometheus".
 4. Insira a URL: `http://prometheus-kube-prometheus-prometheus:9090`.
-5. Não altere as outras configurações padrão.
-6. Clique em "Save & Test".
+5. Clique em "Save & Test".
 
 ### 4.4. Importar Dashboards
 1. No menu lateral esquerdo, clique em "Dashboards" > "new".
