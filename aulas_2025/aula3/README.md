@@ -24,7 +24,7 @@ Este guia demonstra como configurar e utilizar o Prometheus e Grafana para monit
 - Exemplos de consultas PromQL
 - Teste de carga com uma aplicação httpbin e HPA (Horizontal Pod Autoscaler)
 
-✅ **Data da Atualização: 7 de Abril de 2025**
+✅ **Data da Atualização: 21 de Maio de 2025**
 
 ---
 
