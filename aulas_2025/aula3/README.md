@@ -13,13 +13,39 @@ Este guia demonstra como configurar e utilizar o Prometheus e Grafana para monit
 
 ## 1. Configuração do Ambiente
 
-### 1.1. Criar Cluster Kind
+### 1.1. Instalar o Helm
+```bash
+# Instalar o Helm
+curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+
+# Verificar a instalação
+helm version
+```
+
+### 1.2. Criar Cluster Kind
+Primeiro, crie um arquivo chamado `kind-config.yaml` com o seguinte conteúdo:
+```yaml
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: aulathree
+nodes:
+  - role: control-plane
+    extraPortMappings:
+      - containerPort: 9090
+        hostPort: 9090
+        protocol: TCP
+      - containerPort: 3000
+        hostPort: 3000
+        protocol: TCP 
+```
+
+Depois, crie o cluster:
 ```bash
 # Crie um cluster no KIND
 kind create cluster --config kind-config.yaml
 ```
 
-### 1.2. Instalar o Metrics Server
+### 1.3. Instalar o Metrics Server
 ```bash
 kubectl apply -f https://raw.githubusercontent.com/able2cloud/continuous_monitoring_log_analytics/main/aulas_2025/aula3/metricserverfull.yaml
 ```
