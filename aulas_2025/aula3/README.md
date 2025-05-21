@@ -15,15 +15,18 @@ Este guia demonstra como configurar e utilizar o Prometheus e Grafana para monit
 
 ### 1.1. Instalar o Helm
 ```bash
-# Instalar o Helm
+# Instalar o Helm (execute na instância EC2 da AWS Academy)
 curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
 
 # Verificar a instalação
 helm version
+
+# NOTA: Se o comando acima não funcionar, você pode precisar usar sudo
+sudo helm version
 ```
 
 ### 1.2. Criar Cluster Kind
-Primeiro, crie um arquivo chamado `kind-config.yaml` com o seguinte conteúdo:
+Primeiro, crie um arquivo chamado `kind-config.yaml` com o seguinte conteúdo exato:
 ```yaml
 kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
@@ -39,21 +42,27 @@ nodes:
         protocol: TCP 
 ```
 
-Depois, crie o cluster:
+Depois, crie o cluster (certifique-se de estar no diretório onde salvou o arquivo):
 ```bash
 # Crie um cluster no KIND
 kind create cluster --config kind-config.yaml
+
+# Verifique se o cluster foi criado corretamente
+kubectl get nodes
 ```
 
 ### 1.3. Instalar o Metrics Server
 ```bash
+# Aplique o manifesto do Metrics Server
 kubectl apply -f https://raw.githubusercontent.com/able2cloud/continuous_monitoring_log_analytics/main/aulas_2025/aula3/metricserverfull.yaml
 
-# Aguarde o Metrics Server subir completamente
+# Aguarde o Metrics Server subir completamente (pode levar alguns segundos)
 kubectl get pods -n kube-system | grep metrics-server
+# Verifique se aparece "1/1 Running" na saída
 
-# Verifique se o Metrics Server está funcionando corretamente
+# Espere mais uns 30 segundos e verifique se o Metrics Server está funcionando corretamente
 kubectl top nodes
+# Se mostrar estatísticas de CPU e memória, está funcionando
 ```
 
 ---
@@ -62,24 +71,43 @@ kubectl top nodes
 
 ### 2.1. Adicionar Repositórios do Helm
 ```bash
-# Adicione os repositórios do Helm para Prometheus e Grafana
-helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
-helm repo update
+# Verifique se o cluster está acessível
+kubectl cluster-info
+# Deve mostrar o endereço do servidor API Kubernetes
+
+# Adicione os repositórios do Helm para Prometheus e Grafana (use sudo)
+sudo helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 
 # Verifique se o repositório foi adicionado corretamente
-helm repo list
+sudo helm repo list
+# Deve aparecer "prometheus-community" na lista
+
+# Atualize os repositórios
+sudo helm repo update
+
+# Verifique se o repositório está atualizado
+sudo helm search repo prometheus-community
+# Deve mostrar uma lista de charts disponíveis
 ```
 
 ### 2.2. Instalar o Prometheus Operator
 ```bash
-# Instale o Prometheus Operator no seu cluster
-helm install prometheus prometheus-community/kube-prometheus-stack
+# Verifique se o cluster está acessível novamente
+kubectl cluster-info
 
-# Espere todos os componentes subirem antes de acessar o Grafana
+# Instale o Prometheus Operator no seu cluster (use sudo)
+sudo helm install prometheus prometheus-community/kube-prometheus-stack
+
+# Verifique se a instalação foi iniciada
+sudo helm list
+# Deve mostrar "prometheus" na lista
+
+# Espere todos os componentes subirem antes de acessar o Grafana (pode levar 2-3 minutos)
 kubectl --namespace default get pods -l "release=prometheus"
 
 # Verifique se todos os pods estão em estado Running
-# Aguarde até que todos os pods estejam prontos (READY 1/1)
+# Aguarde até que todos os pods estejam prontos (READY 1/1 ou 2/2 dependendo do pod)
+# Se algum pod mostrar "0/1" ou "Pending", espere mais um pouco e execute o comando novamente
 ```
 
 ---
@@ -90,11 +118,23 @@ kubectl --namespace default get pods -l "release=prometheus"
 ```bash
 # Verifique se o serviço do Prometheus está disponível
 kubectl get svc prometheus-kube-prometheus-prometheus
+# Inicialmente, o serviço é do tipo ClusterIP, precisamos alterá-lo para NodePort
+
+# Altere o serviço para NodePort para acessar externamente
+kubectl patch svc prometheus-kube-prometheus-prometheus -p '{"spec": {"type": "NodePort"}}'
+
+# Verifique novamente se o tipo foi alterado para NodePort
+kubectl get svc prometheus-kube-prometheus-prometheus
+# Deve mostrar "NodePort" na coluna TYPE
 
 # Acessando o Prometheus:
 kubectl get svc prometheus-kube-prometheus-prometheus -o jsonpath='{.spec.ports[0].nodePort}'
+# Este comando retornará o número da porta (deve ser um número entre 30000 e 32767)
+
 # Use o número da porta retornado acima para acessar o Prometheus
-# Exemplo: http://<IP_PUBLICO_DA_EC2>:<PORTA>
+# No seu navegador, acesse: http://<IP_PUBLICO_DA_EC2>:<PORTA>
+# Substitua <IP_PUBLICO_DA_EC2> pelo endereço IP público da sua instância EC2
+# Substitua <PORTA> pelo número retornado no comando anterior
 ```
 
 ### 3.2. Exemplos de Consultas PromQL
@@ -126,12 +166,28 @@ kubectl get secret --namespace default prometheus-grafana -o jsonpath="{.data.ad
 
 ### 4.2. Acessar o Grafana
 ```bash
+# Verifique se o serviço do Grafana está disponível
+kubectl get svc prometheus-grafana
+# Inicialmente, o serviço é do tipo ClusterIP, precisamos alterá-lo para NodePort
+
+# Altere o serviço para NodePort para acessar externamente
+kubectl patch svc prometheus-grafana -p '{"spec": {"type": "NodePort"}}'
+
+# Verifique novamente se o tipo foi alterado para NodePort
+kubectl get svc prometheus-grafana
+# Deve mostrar "NodePort" na coluna TYPE
+
 # Obter a porta do serviço Grafana
 kubectl get svc prometheus-grafana -o jsonpath='{.spec.ports[0].nodePort}'
+# Este comando retornará o número da porta (deve ser um número entre 30000 e 32767)
+
 # Use o número da porta retornado acima para acessar o Grafana
-# Exemplo: http://<IP_PUBLICO_DA_EC2>:<PORTA>
+# No seu navegador, acesse: http://<IP_PUBLICO_DA_EC2>:<PORTA>
+# Substitua <IP_PUBLICO_DA_EC2> pelo endereço IP público da sua instância EC2
+# Substitua <PORTA> pelo número retornado no comando anterior
+
 # Usuário: admin
-# Senha: (resultado do comando anterior)
+# Senha: (resultado do comando anterior de obtenção da senha)
 ```
 
 ### 4.3. Configurar o Prometheus como Data Source
