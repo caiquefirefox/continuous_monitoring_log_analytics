@@ -4,9 +4,9 @@ name: aulathree
 nodes:
   - role: control-plane
     extraPortMappings:
-      - containerPort: 9090
+      - containerPort: 31090
         hostPort: 9090
         protocol: TCP
-      - containerPort: 3000
+      - containerPort: 32000
         hostPort: 3000
         protocol: TCP 

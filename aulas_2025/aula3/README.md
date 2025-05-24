@@ -48,10 +48,10 @@ name: aulathree
 nodes:
   - role: control-plane
     extraPortMappings:
-      - containerPort: 9090
+      - containerPort: 31090
         hostPort: 9090
         protocol: TCP
-      - containerPort: 3000
+      - containerPort: 32000
         hostPort: 3000
         protocol: TCP 
 ```
@@ -110,7 +110,8 @@ sudo helm search repo prometheus-community
 sudo kubectl cluster-info
 
 # Instale o Prometheus Operator no seu cluster
-sudo helm install prometheus prometheus-community/kube-prometheus-stack
+sudo helm install prometheus prometheus-community/kube-prometheus-stack \
+  --set prometheus.prometheusSpec.maximumStartupDurationSeconds=60
 
 # Verifique se a instalação foi iniciada
 sudo helm list
@@ -208,17 +209,28 @@ sudo kubectl get secret --namespace default prometheus-grafana -o jsonpath="{.da
 # Verifique se o serviço do Grafana está disponível
 sudo kubectl get svc prometheus-grafana
 # Inicialmente, o serviço é do tipo ClusterIP, precisamos alterá-lo para NodePort
-
-# Altere o serviço para NodePort para acessar externamente
-sudo kubectl patch svc prometheus-grafana -p '{"spec": {"type": "NodePort"}}'
-
-# Verifique novamente se o tipo foi alterado para NodePort
-sudo kubectl get svc prometheus-grafana
-# Deve mostrar "NodePort" na coluna TYPE
-
-# Obter a porta do serviço Grafana
-sudo kubectl get svc prometheus-grafana -o jsonpath='{.spec.ports[0].nodePort}'
-# Este comando retornará o número da porta (deve ser um número entre 30000 e 32767)
+sudo kubectl patch svc prometheus-kube-prometheus-prometheus \
+  -p '{
+    "spec": {
+      "type": "NodePort",
+      "ports": [
+        {
+          "name": "http-web",
+          "port": 9090,
+          "targetPort": 9090,
+          "nodePort": 31090,
+          "protocol": "TCP"
+        },
+        {
+          "name": "dashboard",
+          "port": 3000,
+          "targetPort": 3000,
+          "nodePort": 32000, 
+          "protocol": "TCP"
+        }
+      ]
+    }
+  }'
 
 # Use o número da porta retornado acima para acessar o Grafana
 # No seu navegador, acesse: http://<IP_PUBLICO_DA_EC2>:<PORTA>
