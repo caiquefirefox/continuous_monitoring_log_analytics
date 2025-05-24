@@ -135,17 +135,21 @@ sudo kubectl --namespace default get pods -l "release=prometheus"
 sudo kubectl get svc prometheus-kube-prometheus-prometheus
 # Inicialmente, o serviço é do tipo ClusterIP, precisamos alterá-lo para NodePort
 
-# Altere o serviço para NodePort para acessar externamente
-sudo kubectl patch svc prometheus-kube-prometheus-prometheus -p '{"spec": {"type": "NodePort"}}'
-
-# Verifique novamente se o tipo foi alterado para NodePort
-sudo kubectl get svc prometheus-kube-prometheus-prometheus
-# Deve mostrar "NodePort" na coluna TYPE
-
-# Acessando o Prometheus:
-sudo kubectl get svc prometheus-kube-prometheus-prometheus -o jsonpath='{.spec.ports[0].nodePort}'
-# Este comando retornará o número da porta (deve ser um número entre 30000 e 32767)
-
+sudo kubectl patch svc prometheus-kube-prometheus-prometheus \
+  -p '{
+    "spec": {
+      "type": "NodePort",
+      "ports": [
+        {
+          "name": "http-web",
+          "port": 9090,
+          "targetPort": 9090,
+          "nodePort": 31090,
+          "protocol": "TCP"
+        }
+      ]
+    }
+  }'
 # Use o número da porta retornado acima para acessar o Prometheus
 # No seu navegador, acesse: http://<IP_PUBLICO_DA_EC2>:<PORTA>
 # Substitua <IP_PUBLICO_DA_EC2> pelo endereço IP público da sua instância EC2
@@ -209,37 +213,23 @@ sudo kubectl get secret --namespace default prometheus-grafana -o jsonpath="{.da
 # Verifique se o serviço do Grafana está disponível
 sudo kubectl get svc prometheus-grafana
 # Inicialmente, o serviço é do tipo ClusterIP, precisamos alterá-lo para NodePort
-sudo kubectl patch svc prometheus-kube-prometheus-prometheus \
+# Altere o serviço para NodePort para acessar externamente
+
+sudo kubectl patch svc prometheus-grafana \
   -p '{
     "spec": {
       "type": "NodePort",
       "ports": [
         {
           "name": "http-web",
-          "port": 9090,
-          "targetPort": 9090,
-          "nodePort": 31090,
-          "protocol": "TCP"
-        },
-        {
-          "name": "dashboard",
           "port": 3000,
           "targetPort": 3000,
-          "nodePort": 32000, 
+          "nodePort": 32000,
           "protocol": "TCP"
         }
       ]
     }
   }'
-
-# Use o número da porta retornado acima para acessar o Grafana
-# No seu navegador, acesse: http://<IP_PUBLICO_DA_EC2>:<PORTA>
-# Substitua <IP_PUBLICO_DA_EC2> pelo endereço IP público da sua instância EC2
-# Substitua <PORTA> pelo número retornado no comando anterior
-
-# Usuário: admin
-# Senha: (resultado do comando anterior de obtenção da senha)
-```
 
 ### 4.3. Configurar o Prometheus como Data Source
 1. No menu lateral esquerdo, clique em "Configuration" > "Data Sources".
