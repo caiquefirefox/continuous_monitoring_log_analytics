@@ -231,6 +231,20 @@ sudo kubectl patch svc prometheus-grafana \
     }
   }'
 
+**Por que usar `kubectl patch`?**
+- O Helm chart do Prometheus/Grafana cria serviços como ClusterIP por padrão
+- Não há uma opção simples no Helm para forçar NodePort durante a instalação
+- O `kubectl patch` permite modificar serviços existentes sem recriar recursos
+- É essencial no ambiente AWS Academy para acessar via IP público da EC2
+
+**Acesse via navegador:**
+```
+http://<IP_PUBLICO_DA_EC2>:3000
+```
+
+**Login:** admin  
+**Senha:** Use o comando da seção 4.1 para obter a senha
+
 ### 4.3. Configurar o Prometheus como Data Source
 1. No menu lateral esquerdo, clique em "Configuration" > "Data Sources".
 2. Clique em "Add data source".

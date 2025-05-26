@@ -193,6 +193,34 @@ Vá para **Monitoring** → **Problems** para ver o alerta aparecer. Você prova
 2. Selecione o host `Lab-Docker-Agent`
 3. Escolha gráficos como "CPU utilization" para visualizar as tendências
 
+### 6.3. Conceito Importante: Exposição de Serviços em Kubernetes
+**Nota para laboratórios futuros:** Quando você trabalhar com Kubernetes e Helm, frequentemente encontrará situações onde um serviço é criado como ClusterIP (não acessível externamente) e você precisará expô-lo. 
+
+Exemplo útil para converter serviços usando `kubectl patch`:
+```bash
+# Exemplo conceitual - Converter um serviço Zabbix de ClusterIP para NodePort
+sudo kubectl patch svc zabbix-web \
+  -p '{
+    "spec": {
+      "type": "NodePort",
+      "ports": [
+        {
+          "name": "http",
+          "port": 80,
+          "targetPort": 80,
+          "nodePort": 30080,
+          "protocol": "TCP"
+        }
+      ]
+    }
+  }'
+```
+
+**Por que isso é importante:**
+- Helm charts frequentemente não oferecem opção direta para NodePort
+- Permite expor serviços no ambiente AWS Academy sem recriar recursos
+- Essencial para acessar aplicações via IP público da EC2
+
 ---
 
 ## Passo 7: Encerre o ambiente

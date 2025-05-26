@@ -407,6 +407,36 @@ Para ambientes mais complexos, considere:
 - Sidecar pattern com Jaeger agent
 - Integração com Prometheus e Grafana
 
+#### 11.2.1. Exposição de Serviços Jaeger no Kubernetes
+Se você instalar o Jaeger no Kubernetes (via Helm ou Operator), frequentemente o serviço será criado como ClusterIP. Para expô-lo no ambiente AWS Academy, use:
+
+```bash
+# Exemplo: Converter serviço Jaeger de ClusterIP para NodePort
+sudo kubectl patch svc jaeger-query \
+  -p '{
+    "spec": {
+      "type": "NodePort",
+      "ports": [
+        {
+          "name": "http-query",
+          "port": 16686,
+          "targetPort": 16686,
+          "nodePort": 31686,
+          "protocol": "TCP"
+        }
+      ]
+    }
+  }'
+
+# Verificar a mudança
+sudo kubectl get svc jaeger-query
+```
+
+**Por que isso é útil:**
+- Jaeger Operator e Helm charts geralmente criam serviços ClusterIP
+- Permite acesso via IP público da EC2 sem recriar recursos
+- Essencial para visualizar traces no ambiente AWS Academy
+
 ---
 
 Com isso, você tem um ambiente completo de distributed tracing funcionando no AWS Academy, acessível via IP público da EC2, com traces visualizáveis na interface web do Jaeger para análise de performance e debugging de aplicações distribuídas. 

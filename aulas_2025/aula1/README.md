@@ -206,7 +206,37 @@ http://<IP_PUBLICO_DA_EC2>:8080
 2. Vá para EC2 > Instances
 3. Localize sua instância e copie o "Public IPv4 address"
 
-### 4.4. Verificar Funcionamento
+### 4.4. Alternativa: Converter Serviço ClusterIP para NodePort (Útil com Helm)
+Se você tiver um serviço que foi criado como ClusterIP (comum com instalações Helm) e precisar expô-lo, use o `kubectl patch`:
+
+```bash
+# Exemplo: Converter um serviço nginx de ClusterIP para NodePort
+sudo kubectl patch svc nginx-service -n aula1 \
+  -p '{
+    "spec": {
+      "type": "NodePort",
+      "ports": [
+        {
+          "name": "http",
+          "port": 80,
+          "targetPort": 80,
+          "nodePort": 30080,
+          "protocol": "TCP"
+        }
+      ]
+    }
+  }'
+
+# Verificar a mudança
+sudo kubectl get svc nginx-service -n aula1
+```
+
+**Quando usar este comando:**
+- Quando você instala aplicações via Helm que não oferecem opção de NodePort
+- Quando você precisa expor um serviço ClusterIP existente no ambiente AWS Academy
+- Para modificar a porta NodePort de um serviço existente
+
+### 4.5. Verificar Funcionamento
 ```bash
 # Teste local para verificar se o serviço está respondendo
 curl http://localhost:8080

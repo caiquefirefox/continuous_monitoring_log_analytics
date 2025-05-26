@@ -171,7 +171,37 @@ http://<IP_PUBLICO_DA_EC2>:8080
 - A porta `8080` está mapeada para a porta `30080` do serviço NodePort do httpbin
 - **Importante:** Use `http://` (não `https://`) para o httpbin
 
-### 5.3. Verificar no Dashboard
+### 5.3. Alternativa: Converter Serviço ClusterIP para NodePort (Útil com Helm)
+Se você tiver um serviço que foi criado como ClusterIP (comum com instalações Helm) e precisar expô-lo, use o `kubectl patch`:
+
+```bash
+# Exemplo: Se o httpbin fosse criado como ClusterIP, você poderia convertê-lo assim:
+sudo kubectl patch svc httpbin-service \
+  -p '{
+    "spec": {
+      "type": "NodePort",
+      "ports": [
+        {
+          "name": "http",
+          "port": 80,
+          "targetPort": 80,
+          "nodePort": 30080,
+          "protocol": "TCP"
+        }
+      ]
+    }
+  }'
+
+# Verificar a mudança
+sudo kubectl get svc httpbin-service
+```
+
+**Quando usar este comando:**
+- Quando você instala aplicações via Helm que não oferecem opção de NodePort
+- Quando você precisa expor um serviço ClusterIP existente
+- Para modificar a porta NodePort de um serviço existente
+
+### 5.4. Verificar no Dashboard
 Navegue até os recursos do Kubernetes Dashboard para visualizar o httpbin que foi criado, verificando:
 
 1. **Workloads** → **Deployments**: Você deve ver o deployment `httpbin`
@@ -179,7 +209,7 @@ Navegue até os recursos do Kubernetes Dashboard para visualizar o httpbin que f
 3. **Service and Discovery** → **Services**: Você deve ver o serviço `httpbin-service`
 4. **Config and Storage**: Explore outras configurações se necessário
 
-### 5.4. Testar o httpbin
+### 5.5. Testar o httpbin
 ```bash
 # Teste local para verificar se o httpbin está respondendo
 curl http://localhost:8080

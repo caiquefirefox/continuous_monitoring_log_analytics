@@ -117,6 +117,36 @@ sudo kubectl get svc
 # Deve mostrar tanto o serviço ClusterIP quanto o NodePort
 ```
 
+### 3.3. Alternativa: Converter Serviço ClusterIP para NodePort (Útil com Helm)
+Se você instalou uma aplicação via Helm que criou apenas um serviço ClusterIP, você pode convertê-lo facilmente:
+
+```bash
+# Exemplo: Converter o serviço hello-world de ClusterIP para NodePort
+sudo kubectl patch svc hello-world \
+  -p '{
+    "spec": {
+      "type": "NodePort",
+      "ports": [
+        {
+          "name": "http",
+          "port": 8080,
+          "targetPort": 8080,
+          "nodePort": 30080,
+          "protocol": "TCP"
+        }
+      ]
+    }
+  }'
+
+# Verificar a mudança
+sudo kubectl get svc hello-world
+```
+
+**Quando usar este comando:**
+- Quando você instala aplicações via Helm que não oferecem opção de NodePort
+- Para fornecer acesso alternativo além do Ingress
+- Para debugging quando o Ingress não está funcionando corretamente
+
 ---
 
 ## 4. Configuração do Ingress
