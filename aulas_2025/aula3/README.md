@@ -266,10 +266,13 @@ O Prometheus Operator já instala automaticamente um conjunto completo de dashbo
 #### 4.4.2. Importar Dashboards Adicionais (Opcional)
 Se quiser explorar dashboards alternativos criados pela comunidade:
 
+
+
 1. No menu lateral esquerdo, clique em "Dashboards" (ícone de quatro quadrados).
 2. Clique em "+ Import" no topo da página.
 3. Na tela de importação, você verá várias opções:
    - Na seção "Import via grafana.com", digite um dos seguintes IDs:
+     - **ID 22128** HPA
      - **ID 315:** Kubernetes cluster monitoring (por CoreOS).
      - **ID 12740:** Kubernetes Monitoring (por Bitnami).
    - Clique no botão "Load".
@@ -346,7 +349,7 @@ sudo kubectl get svc httpbin-service -o jsonpath='{.spec.ports[0].nodePort}'
 # Exemplo: http://<IP_PUBLICO_DA_EC2>:<PORTA>
 
 # Comando stress test
-sudo kubectl exec -it ab-stress -- ab -n 10000 -c 100 http://<IP_PUBLICO_DA_EC2>:<PORTA>/get
+sudo kubectl exec -it ab-stress -- ab -n 10000 -c 100 http://svc/get
 
 # Durante o teste, monitore o HPA em outro terminal
 sudo kubectl get hpa -w
