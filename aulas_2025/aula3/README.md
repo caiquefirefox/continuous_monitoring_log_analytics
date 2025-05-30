@@ -141,7 +141,7 @@ sudo kubectl patch svc prometheus-kube-prometheus-prometheus \
       "type": "NodePort",
       "ports": [
         {
-          "name": "http-web",
+          "name": "http-web-aula",
           "port": 9090,
           "targetPort": 9090,
           "nodePort": 31090,
