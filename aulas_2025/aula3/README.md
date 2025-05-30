@@ -244,14 +244,7 @@ http://<IP_PUBLICO_DA_EC2>:3000
 
 **Login:** admin  
 **Senha:** Use o comando da seção 4.1 para obter a senha
-
-### 4.3. Configurar o Prometheus como Data Source
-1. No menu lateral esquerdo, clique em "Configuration" > "Data Sources".
-2. Clique em "Add data source".
-3. Escolha "Prometheus".
-4. Insira a URL: `http://prometheus-kube-prometheus-prometheus:9090`.
-5. Clique em "Save & Test".
-
+```
 ### 4.4. Dashboards do Grafana
 
 #### 4.4.1. Visualizar Dashboards Pré-instalados (Recomendado para iniciantes)
