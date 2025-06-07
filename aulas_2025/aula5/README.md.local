@@ -1,54 +1,68 @@
-# Laboratório Atualizado: Kubernetes Dashboard e Aplicação httpbin
+# 🚀 Laboratório: Kubernetes Dashboard & Aplicação httpbin
 
-Este guia mostra como configurar e utilizar o Kubernetes Dashboard, uma interface gráfica para gerenciar seu cluster Kubernetes. Ele abrange:
-- Criação de um cluster Kind
-- Instalação e acesso ao Kubernetes Dashboard
-- Configuração de uma conta de serviço com permissões administrativas
-- Implantação de uma aplicação httpbin
+<div align="center">
 
-✅ **Data da Atualização: 7 de Abril de 2025**
+![Kubernetes](https://img.shields.io/badge/kubernetes-%23326ce5.svg?style=for-the-badge&logo=kubernetes&logoColor=white)
+![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)
+
+</div>
+
+## 📋 Sobre este Laboratório
+
+Este guia mostra como configurar e utilizar o **Kubernetes Dashboard**, uma interface gráfica para gerenciar seu cluster Kubernetes.
+
+### 🎯 O que você vai aprender:
+
+- 🔧 Criação de um cluster Kind
+- 📊 Instalação e acesso ao Kubernetes Dashboard  
+- 🔐 Configuração de uma conta de serviço com permissões administrativas
+- 🌐 Implantação de uma aplicação httpbin
+
+> ✅ **Data da Atualização: 7 de Abril de 2025**
 
 ---
 
-## 1. Configuração do Ambiente
+## 1️⃣ Configuração do Ambiente
 
-### 1.1. Criar Cluster Kind
+### 🔧 1.1. Criar Cluster Kind
+
 ```bash
 # Criar o Cluster com Kind
-kind create cluster --config kind-config.yaml
+kind create cluster --name aulafive
 
 # Verificar o cluster
 kubectl get nodes
 ```
 
+> 💡 **Dica:** Aguarde alguns minutos para o cluster ficar completamente pronto antes de prosseguir.
+
 ---
 
-## 2. Instalação do Kubernetes Dashboard
+## 2️⃣ Instalação do Kubernetes Dashboard
 
-### 2.1. Instalar o Dashboard
+### 📊 2.1. Instalar o Dashboard
+
 ```bash
 # Instalar o Kubernetes Dashboard
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.7.0/aio/deploy/recommended.yaml
 ```
 
-### 2.2. Configurar o Node para o Ingress
-```bash
-kubectl label node ingress-lab-control-plane ingress-ready=true
-kubectl label node ingress-lab-control-plane kubernetes.io/os=linux
-```
+> ⚠️ **Importante:** Este comando baixa e instala todos os componentes necessários do Dashboard.
 
 ---
 
-## 3. Configuração de Acesso ao Dashboard
+## 3️⃣ Configuração de Acesso ao Dashboard
 
-### 3.1. Criar Conta de Serviço e Permissões
+### 🔐 3.1. Criar Conta de Serviço e Permissões
+
 ```bash
 # Criar uma Conta de Serviço e Cluster Role Binding
 kubectl create serviceaccount dashboard-admin-sa -n default
 kubectl create clusterrolebinding dashboard-admin-sa --clusterrole=cluster-admin --serviceaccount=default:dashboard-admin-sa
 ```
 
-### 3.2. Configurar Token de Acesso
+### 🔑 3.2. Configurar Token de Acesso
+
 ```bash
 # Baixar o arquivo dashboard-admin-sa-token.yaml
 wget https://raw.githubusercontent.com/able2cloud/continuous_monitoring_log_analytics/main/aulas_2024/aula5/dashboard-admin-sa-token.yaml
@@ -56,50 +70,83 @@ wget https://raw.githubusercontent.com/able2cloud/continuous_monitoring_log_anal
 # Criar o token
 kubectl apply -f dashboard-admin-sa-token.yaml
 
-# Obter o Token de Acesso
-kubectl describe secret dashboard-admin-sa-token -n default
+# Obter o Token de Acesso (copie o resultado)
+kubectl get secret dashboard-admin-sa-token -n default -o jsonpath='{.data.token}' | base64 -d; echo
 ```
+
+> 🔐 **Importante:** Copie o token gerado - você precisará dele para fazer login no Dashboard!
 
 ---
 
-## 4. Acessar o Dashboard
+## 4️⃣ Acessar o Dashboard
 
-### 4.1. Configurar Port-Forward
+### 🔗 4.1. Configurar Port-Forward
+
 ```bash
 # Fazer o Port-Forward para Acessar o Dashboard
 kubectl port-forward svc/kubernetes-dashboard -n kubernetes-dashboard 8001:443
 ```
 
-### 4.2. Passos para Acessar pelo Navegador
-1. Abra seu navegador e acesse a URL: https://localhost:8001/
-2. Quando a página de login do Kubernetes Dashboard aparecer, selecione a opção Token e cole o token obtido anteriormente.
-3. Clique em Sign In.
+> 🔄 **Nota:** Este comando deve ficar rodando. Abra um novo terminal para os próximos passos.
+
+### 🌐 4.2. Passos para Acessar pelo Navegador
+
+1. 🌐 Abra seu navegador e acesse a URL: **https://localhost:8001/**
+2. ⚠️ **Importante**: Aceite o certificado SSL inseguro (clique em "Advanced" > "Proceed to localhost")
+3. 🔐 Quando a página de login do Kubernetes Dashboard aparecer, selecione a opção **"Token"**
+4. 📋 Cole o token obtido anteriormente (sem quebras de linha)
+5. ✅ Clique em **"Sign In"**
 
 ---
 
-## 5. Implantação da Aplicação httpbin
+## 5️⃣ Implantação da Aplicação httpbin
 
-### 5.1. Criar o Deployment e Serviço
+### 🚀 5.1. Criar o Deployment e Serviço
+
 ```bash
 # Criar o httpbin
 kubectl apply -f https://raw.githubusercontent.com/able2cloud/continuous_monitoring_log_analytics/main/aulas_2024/aula5/httpbinfull.yaml
 ```
 
-### 5.2. Verificar no Dashboard
-Navegue até os recursos do Kubernetes Dashboard para visualizar o httpbin que foi criado, verificando:
-- Deployments
-- Pods
-- Services
-- Outros recursos associados 
+### 👀 5.2. Verificar no Dashboard
+
+Navegue até os recursos do **Kubernetes Dashboard** para visualizar o httpbin que foi criado, verificando:
+
+- 📦 **Deployments**
+- 🔄 **Pods** 
+- 🌐 **Services**
+- 📋 **Outros recursos associados**
+
+> 💡 **Dica:** Use o Dashboard para explorar todos os recursos criados de forma visual! 
 
 ---
 
-## 6. Limpeza dos Recursos
+## 6️⃣ Limpeza dos Recursos
+
+### 🧹 Removendo todos os recursos criados:
+
 ```bash
 # Para limpar os recursos:
 kubectl delete -f https://raw.githubusercontent.com/able2cloud/continuous_monitoring_log_analytics/main/aulas_2024/aula5/httpbinfull.yaml
 kubectl delete -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.7.0/aio/deploy/recommended.yaml
 kubectl delete -f dashboard-admin-sa-token.yaml
+kubectl delete serviceaccount dashboard-admin-sa -n default
+kubectl delete clusterrolebinding dashboard-admin-sa
 
+# Deletar o cluster Kind
 kind delete cluster --name aulafive
-``` 
+```
+
+> ⚠️ **Atenção:** Estes comandos irão remover TODOS os recursos criados neste laboratório.
+
+---
+
+<div align="center">
+
+### 🎉 Parabéns! 
+
+Você completou o laboratório do **Kubernetes Dashboard**!
+
+![Success](https://img.shields.io/badge/Status-Completed-success?style=for-the-badge)
+
+</div> 
