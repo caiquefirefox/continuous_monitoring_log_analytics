@@ -1,0 +1,158 @@
+version: '3.8'
+
+networks:
+  jaeger:
+    driver: bridge
+
+volumes:
+  jaeger-badger:
+    driver: local
+  jaeger-prometheus:
+    driver: local
+
+services:
+  # Jaeger All-in-One - Versão mais recente
+  jaeger:
+    image: jaegertracing/all-in-one:1.54
+    container_name: jaeger-aio
+    ports:
+      - "5775:5775/udp"      # Thrift compact
+      - "6831:6831/udp"      # Thrift binary
+      - "6832:6832/udp"      # Thrift binary 
+      - "5778:5778"          # Agent configs
+      - "16686:16686"        # Web UI
+      - "14268:14268"        # Collector HTTP
+      - "14250:14250"        # Collector gRPC
+      - "9411:9411"          # Zipkin
+      - "8888:8888"          # Prometheus metrics
+    environment:
+      - COLLECTOR_ZIPKIN_HOST_PORT=:9411
+      - COLLECTOR_OTLP_ENABLED=true
+      - JAEGER_DISABLED=false
+      - BADGER_EPHEMERAL=false
+      - BADGER_DIRECTORY_VALUE=/badger/data
+      - BADGER_DIRECTORY_KEY=/badger/key
+      - SPAN_STORAGE_TYPE=badger
+      - METRICS_STORAGE_TYPE=prometheus
+      - PROMETHEUS_SERVER_URL=http://prometheus:9090
+      - PROMETHEUS_QUERY_SUPPORT_SPANMETRICS_CONNECTOR=true
+    volumes:
+      - jaeger-badger:/badger
+    networks:
+      - jaeger
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:16686/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+
+  # Aplicação Python moderna com OpenTelemetry
+  python-app:
+    build: .
+    container_name: python-tracing-app
+    environment:
+      - JAEGER_AGENT_HOST=jaeger
+      - JAEGER_AGENT_PORT=6831
+      - JAEGER_SAMPLER_TYPE=const
+      - JAEGER_SAMPLER_PARAM=1
+      - JAEGER_REPORTER_LOG_SPANS=true
+      - OTEL_EXPORTER_JAEGER_ENDPOINT=http://jaeger:14268/api/traces
+      - OTEL_SERVICE_NAME=python-microservice
+      - OTEL_RESOURCE_ATTRIBUTES=service.version=1.0.0,deployment.environment=development
+    networks:
+      - jaeger
+    depends_on:
+      jaeger:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # HotROD - Aplicação de exemplo complexa
+  hotrod:
+    image: jaegertracing/example-hotrod:1.54
+    container_name: hotrod-demo
+    ports:
+      - "8080:8080"
+      - "8083:8083"
+    environment:
+      - JAEGER_AGENT_HOST=jaeger
+      - JAEGER_AGENT_PORT=6831
+      - JAEGER_SAMPLER_TYPE=const
+      - JAEGER_SAMPLER_PARAM=1
+    networks:
+      - jaeger
+    depends_on:
+      jaeger:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Prometheus para métricas (opcional mas útil)
+  prometheus:
+    image: prom/prometheus:v2.48.1
+    container_name: prometheus-jaeger
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - jaeger-prometheus:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=15d'
+    networks:
+      - jaeger
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9090/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  # Grafana para visualização de métricas
+  grafana:
+    image: grafana/grafana:10.2.3
+    container_name: grafana-jaeger
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin123
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel,grafana-worldmap-panel
+    volumes:
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    networks:
+      - jaeger
+    depends_on:
+      - prometheus
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3000/api/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  # Load Generator para testes
+  load-generator:
+    image: curlimages/curl:8.5.0
+    container_name: load-generator
+    networks:
+      - jaeger
+    depends_on:
+      - hotrod
+    command: >
+      sh -c "
+        echo 'Aguardando HotROD ficar pronto...' &&
+        sleep 30 &&
+        echo 'Iniciando geração de carga...' &&
+        while true; do
+          curl -s http://hotrod:8080/dispatch?customer=123 > /dev/null || true
+          curl -s http://hotrod:8080/dispatch?customer=456 > /dev/null || true
+          curl -s http://hotrod:8080/dispatch?customer=789 > /dev/null || true
+          sleep 2
+        done
+      "
+    restart: unless-stopped

@@ -1,0 +1,19 @@
+# OpenTelemetry Core
+opentelemetry-api==1.21.0
+opentelemetry-sdk==1.21.0
+opentelemetry-exporter-jaeger-thrift==1.21.0
+
+# Instrumentação automática
+opentelemetry-instrumentation-requests==0.42b0
+opentelemetry-instrumentation-logging==0.42b0
+
+# Semântica de recursos
+opentelemetry-semantic-conventions==0.42b0
+
+# HTTP requests para testes
+requests==2.31.0
+
+# Logging e utilitários
+typing-extensions==4.8.0
+
+

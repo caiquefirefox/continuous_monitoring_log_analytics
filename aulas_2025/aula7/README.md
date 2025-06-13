@@ -1,442 +1,326 @@
-# Laboratório Atualizado: Jaeger para Rastreamento Distribuído com Docker Compose - AWS Academy
+# 🚀 ELK Stack 2025 - Lab Aula 7
 
-Este guia demonstra como configurar e utilizar o Jaeger para rastreamento distribuído (distributed tracing) usando Docker Compose no ambiente AWS Academy. Ele abrange:
-- Configuração de um ambiente com Docker Compose
-- Implementação de uma aplicação Python simples que envia spans para o Jaeger
-- Visualização e análise de traces na interface gráfica do Jaeger via IP público da EC2
+## Monitoramento Avançado de Logs com Elasticsearch, Logstash e Kibana
 
-✅ **Data da Atualização: 21 de Maio de 2025**
+Este laboratório apresenta uma implementação moderna e completa da stack ELK (Elasticsearch, Logstash, Kibana) com melhorias significativas em relação à versão de 2023.
 
 ---
 
-## 1. Estrutura do Projeto
+## 🆕 **Novidades da Versão 2025**
+
+### ✨ **Principais Melhorias**
+- **ELK Stack 8.11.3** - Versões mais recentes com melhor performance
+- **Logs Estruturados JSON** - Nginx configurado para logs JSON nativos
+- **Filebeat & Metricbeat** - Coleta moderna de logs e métricas
+- **Health Checks** - Monitoramento de saúde de todos os serviços
+- **Interface Web Interativa** - Gerador de logs para testes
+- **Configurações Otimizadas** - Performance e segurança aprimoradas
+- **GeoIP & User Agent Parsing** - Enriquecimento automático de dados
+- **Dashboards Pré-configurados** - Visualizações prontas para uso
+
+---
+
+## 🏗️ **Arquitetura**
 
 ```
-jaeger-demo/
-├── app.py                # Aplicação Python que envia spans para o Jaeger
-├── Dockerfile            # Definição da imagem Docker para a aplicação Python
-├── docker-compose.yml    # Configuração do Docker Compose com Jaeger e a aplicação
-└── requirements.txt      # Dependências Python necessárias
+┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
+│    Nginx    │───▶│  Filebeat   │───▶│  Logstash   │───▶│Elasticsearch│
+│(Logs JSON) │    │(Coleta Logs)│    │(Processa)   │    │(Armazena)   │
+└─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘
+                                                                  │
+┌─────────────┐    ┌─────────────┐                               │
+│  Metricbeat │───▶│Elasticsearch│◀─────────────────────────────┘
+│(Métricas)   │    │             │
+└─────────────┘    └─────────────┘
+                           │
+                           ▼
+                   ┌─────────────┐
+                   │   Kibana    │
+                   │(Visualiza)  │
+                   └─────────────┘
 ```
 
 ---
 
-## 2. Configuração do Ambiente
+## 🚀 **Quick Start**
 
-### 2.1. Obter o Código-fonte
+### **Pré-requisitos**
+- Docker 24.0+
+- Docker Compose 2.0+
+- 8GB RAM mínimo
+- 5GB espaço em disco
+
+### **1. Clone e Execute**
 ```bash
-# Execute na instância EC2 da AWS Academy
 git clone https://github.com/able2cloud/continuous_monitoring_log_analytics.git
-cd continuous_monitoring_log_analytics/aulas_2025/aula7/jaeger-demo
+cd continuous_monitoring_log_analytics/aulas_2025/aula7
 
-# Verificar se todos os arquivos estão presentes
-ls -la
-# Deve mostrar: app.py, Dockerfile, docker-compose.yml, requirements.txt
+# Inicie a stack
+docker-compose up -d
+
+# Acompanhe os logs
+docker-compose logs -f
 ```
 
-### 2.2. Verificar Pré-requisitos
+### **2. Aguarde a Inicialização**
 ```bash
-# Verificar se o Docker está instalado e funcionando (execute na instância EC2 da AWS Academy)
-sudo systemctl status docker
+# Verifique o status dos serviços
+docker-compose ps
 
-# Se necessário, instalar o Docker (apenas se não estiver instalado)
-sudo apt-get update
-sudo apt-get install docker.io docker-compose-plugin -y
-sudo usermod -aG docker $USER
-newgrp docker
+# Aguarde todos ficarem 'healthy'
+watch docker-compose ps
+```
+
+### **3. Acesse as Interfaces**
+- **🌐 Web App**: http://localhost
+- **📊 Kibana**: http://localhost:5601
+- **🔍 Elasticsearch**: http://localhost:9200
+- **⚙️ Logstash**: http://localhost:9600
+
+---
+
+## 📊 **Configuração do Kibana**
+
+### **1. Configurar Index Patterns**
+1. Acesse Kibana em http://localhost:5601
+2. Vá para **Stack Management** → **Index Patterns**
+3. Clique em **Create index pattern**
+4. Configure os seguintes patterns:
+
+#### **Para Logs do Nginx (via Logstash)**
+- **Index pattern**: `logstash-nginx-*`
+- **Time field**: `@timestamp`
+
+#### **Para Logs do Nginx (via Filebeat)**
+- **Index pattern**: `filebeat-nginx-*`
+- **Time field**: `@timestamp`
+
+#### **Para Métricas do Sistema**
+- **Index pattern**: `metricbeat-*`
+- **Time field**: `@timestamp`
+
+### **2. Explorar os Dados**
+1. Vá para **Discover**
+2. Selecione o index pattern desejado
+3. Explore os campos disponíveis:
+   - `remote_addr` - IP do cliente
+   - `status` - Código HTTP
+   - `request_time` - Tempo de resposta
+   - `geoip.*` - Localização geográfica
+   - `useragent.*` - Informações do browser
+
+---
+
+## 🎯 **Gerando Logs de Teste**
+
+### **Via Interface Web**
+1. Acesse http://localhost
+2. Use os botões de **Gerador de Logs**:
+   - ✅ **Sucesso (200)** - Requisições bem-sucedidas
+   - ❌ **Não Encontrado (404)** - Páginas inexistentes
+   - 💥 **Erro Servidor (500)** - Erros internos
+   - 🔌 **API Call** - Chamadas de API
+   - 🐌 **Requisição Lenta** - Teste de performance
+   - 🚀 **Múltiplas Requisições** - Teste de volume
+
+### **Via Linha de Comando**
+```bash
+# Gerar tráfego variado
+for i in {1..100}; do
+  curl http://localhost/
+  curl http://localhost/api/users
+  curl http://localhost/nonexistent-page
+  sleep 1
+done
+
+# Simular diferentes IPs
+curl -H "X-Forwarded-For: 192.168.1.100" http://localhost/
+curl -H "X-Forwarded-For: 10.0.0.50" http://localhost/
 ```
 
 ---
 
-## 3. Arquivos do Projeto
+## 📈 **Criando Visualizações**
 
-### 3.1. app.py - Aplicação Python
-```python
-import time
-import opentracing
-from jaeger_client import Config
+### **1. Gráfico de Status HTTP**
+1. Vá para **Visualize** → **Create visualization**
+2. Escolha **Pie chart**
+3. Configure:
+   - **Buckets**: Split slices
+   - **Aggregation**: Terms
+   - **Field**: `status.keyword`
 
-def init_jaeger_tracer(service_name='my_service'):
-    config = Config(
-        config={
-            'sampler': {'type': 'const', 'param': 1},
-            'logging': True,
-        },
-        service_name=service_name,
-        validate=True,
-    )
-    return config.initialize_tracer()
+### **2. Mapa de Localização de IPs**
+1. Escolha **Maps**
+2. Configure:
+   - **Layer**: Documents
+   - **Index pattern**: `logstash-nginx-*`
+   - **Geospatial field**: `geoip.location`
 
-if __name__ == "__main__":
-    tracer = init_jaeger_tracer()
-    with tracer.start_span('test_span') as span:
-        span.set_tag('example_tag', 'test_value')
-        span.log_kv({'event': 'test_message', 'life': 42})
-        time.sleep(1)
-    tracer.close()
-```
+### **3. Timeline de Requisições**
+1. Escolha **Line chart**
+2. Configure:
+   - **X-axis**: Date Histogram (`@timestamp`)
+   - **Y-axis**: Count
 
-### 3.2. requirements.txt - Dependências Python
-```
-opentracing
-jaeger-client
-```
+---
 
-### 3.3. Dockerfile - Definição da Imagem Docker
-```dockerfile
-# Use uma imagem base oficial do Python
-FROM python:3.12
+## 🔧 **Configurações Avançadas**
 
-# Defina o diretório de trabalho
-WORKDIR /app
-
-# Copie os arquivos de requisitos
-COPY requirements.txt .
-
-# Instale as dependências
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Copie o restante dos arquivos da aplicação
-COPY . .
-
-# Comando para executar a aplicação
-CMD ["python", "app.py"]
-```
-
-### 3.4. docker-compose.yml - Configuração dos Serviços
+### **Elasticsearch**
 ```yaml
-version: '3'
+# Configurações de performance
+ES_JAVA_OPTS: "-Xms2g -Xmx2g"
+bootstrap.memory_lock: true
+```
 
-services:
-  jaeger:
-    image: jaegertracing/all-in-one:1.29
-    ports:
-      - "5775:5775/udp"
-      - "6831:6831/udp"
-      - "6832:6832/udp"
-      - "5778:5778"
-      - "16686:16686"
-      - "14268:14268"
-      - "14250:14250"
-      - "9411:9411"
-    environment:
-      - COLLECTOR_ZIPKIN_HTTP_PORT=9411
+### **Logstash**
+```yaml
+# Pipeline otimizado
+pipeline.workers: 2
+pipeline.batch.size: 1000
+pipeline.batch.delay: 50
+```
 
-  python-app:
-    build: .
-    environment:
-      - JAEGER_AGENT_HOST=jaeger
-    depends_on:
-      - jaeger
+### **Nginx Logs JSON**
+O Nginx está configurado para gerar logs estruturados em JSON:
+```json
+{
+  "time_local": "25/Dec/2025:10:30:45 +0000",
+  "remote_addr": "172.17.0.1",
+  "status": "200",
+  "request_time": "0.001",
+  "http_user_agent": "Mozilla/5.0...",
+  "geoip": {...},
+  "useragent": {...}
+}
 ```
 
 ---
 
-## 4. Executando a Demo
+## 🐛 **Troubleshooting**
 
-### 4.1. Construir e Iniciar os Contêineres
+### **Problemas Comuns**
+
+#### **Elasticsearch não inicia**
 ```bash
-# Construir e iniciar os contêineres (execute na instância EC2 da AWS Academy)
-sudo docker compose up --build
+# Verificar recursos
+docker stats
 
-# O comando acima irá:
-# 1. Construir a imagem da aplicação Python
-# 2. Baixar a imagem do Jaeger
-# 3. Iniciar ambos os serviços
-# 4. A aplicação Python executará uma vez e enviará um trace para o Jaeger
-
-# Aguarde até ver mensagens como:
-# "python-app-1 exited with code 0" (aplicação terminou com sucesso)
-# "jaeger-1 | ... Jaeger server started"
+# Aumentar memória virtual
+sudo sysctl -w vm.max_map_count=262144
+echo 'vm.max_map_count=262144' | sudo tee -a /etc/sysctl.conf
 ```
 
-### 4.2. Verificar se os Serviços Estão Rodando
+#### **Logs não aparecem no Kibana**
 ```bash
-# Verificar se os contêineres estão rodando (execute na instância EC2 da AWS Academy)
-sudo docker compose ps
+# Verificar se Logstash está processando
+curl http://localhost:9600/_node/stats/pipelines
 
-# Deve mostrar:
-# - jaeger: rodando (Up)
-# - python-app: pode mostrar "Exited (0)" pois executa apenas uma vez
+# Verificar índices no Elasticsearch
+curl http://localhost:9200/_cat/indices?v
+```
 
-# Verificar logs do Jaeger
-sudo docker compose logs jaeger
-
-# Verificar logs da aplicação Python
-sudo docker compose logs python-app
+#### **Health checks falhando**
+```bash
+# Verificar status detalhado
+docker-compose exec elasticsearch curl http://localhost:9200/_cluster/health?pretty
+docker-compose exec kibana curl http://localhost:5601/api/status
 ```
 
 ---
 
-## 5. Acessar a Interface do Jaeger
+## 📚 **Exercícios Práticos**
 
-### 5.1. Configurar Acesso via IP Público
-**No ambiente AWS Academy, acesse via navegador:**
-```
-http://<IP_PUBLICO_DA_EC2>:16686
-```
+### **Nível Básico**
+1. Configure os index patterns no Kibana
+2. Explore os logs na aba Discover
+3. Crie uma visualização de pizza com status HTTP
+4. Gere diferentes tipos de logs via interface web
 
-**Onde:**
-- `<IP_PUBLICO_DA_EC2>` deve ser substituído pelo endereço IP público da sua instância EC2 da AWS Academy
-- A porta `16686` é a porta padrão da interface web do Jaeger
+### **Nível Intermediário**
+1. Crie um dashboard com múltiplas visualizações
+2. Configure alertas para erros 5xx
+3. Analise padrões de user agents
+4. Crie filtros por localização geográfica
 
-**Para encontrar o IP público da sua instância EC2:**
-1. Acesse o console da AWS Academy
-2. Vá para EC2 > Instances
-3. Localize sua instância e copie o "Public IPv4 address"
+### **Nível Avançado**
+1. Implemente parsing customizado no Logstash
+2. Configure machine learning para detecção de anomalias
+3. Integre com sistemas de monitoramento externos
+4. Otimize performance para alto volume de logs
 
-**Importante:** Certifique-se de que o Security Group da instância EC2 permite tráfego de entrada na porta 16686.
+---
 
-### 5.2. Verificar Conectividade Local
+## 🔍 **Monitoramento e Métricas**
+
+### **URLs de Monitoramento**
+- **Elasticsearch Health**: http://localhost:9200/_cluster/health
+- **Logstash Stats**: http://localhost:9600/_node/stats
+- **Kibana Status**: http://localhost:5601/api/status
+- **Nginx Status**: http://localhost/nginx_status
+
+### **Comandos Úteis**
 ```bash
-# Teste local para verificar se o Jaeger está respondendo (execute na instância EC2 da AWS Academy)
-curl -I http://localhost:16686
+# Ver logs de todos os serviços
+docker-compose logs -f
 
-# Deve retornar algo como "HTTP/1.1 200 OK"
+# Ver logs específicos do Elasticsearch
+docker-compose logs -f elasticsearch
+
+# Verificar índices criados
+curl http://localhost:9200/_cat/indices?v
+
+# Estatísticas do cluster
+curl http://localhost:9200/_cluster/stats?pretty
 ```
 
 ---
 
-## 6. Visualização dos Traces
+## 🧹 **Limpeza**
 
-### 6.1. Passos para Visualizar os Traces
-1. Acesse `http://<IP_PUBLICO_DA_EC2>:16686` no seu navegador
-2. A interface do Jaeger será carregada
-3. No campo **"Service"** (canto superior esquerdo), selecione `my_service` (nome do serviço definido no script Python)
-4. Clique no botão **"Find Traces"** (Encontrar Traces)
-5. Uma lista de traces será exibida. Clique em qualquer trace para visualizar detalhes, incluindo:
-   - **Spans**: Segmentos de operação
-   - **Tags**: Metadados associados (`example_tag: test_value`)
-   - **Logs**: Eventos registrados (`test_message`, `life: 42`)
-   - **Tempo de execução**: Duração de cada span
-
-### 6.2. Interpretando os Dados
-Na interface do Jaeger, você verá:
-
-- **Timeline**: Linha do tempo mostrando quando cada span ocorreu
-- **Span Details**: Informações detalhadas sobre cada operação
-- **Service Map**: Mapa visual dos serviços (se houver múltiplos serviços)
-- **Dependencies**: Dependências entre serviços
-
-### 6.3. Explorar Funcionalidades
-1. **Filtros**: Use filtros de tempo, operação, tags para buscar traces específicos
-2. **Comparison**: Compare traces diferentes para análise de performance
-3. **JSON View**: Visualize os dados brutos do trace
-4. **Graph View**: Visualização gráfica das relações entre spans
-
----
-
-## 7. Executar Múltiplas Traces
-
-### 7.1. Gerar Mais Traces para Análise
 ```bash
-# Para gerar mais traces, execute novamente a aplicação Python (execute na instância EC2 da AWS Academy)
-sudo docker compose run --rm python-app
+# Parar todos os serviços
+docker-compose down
 
-# Repita o comando algumas vezes para gerar múltiplos traces
-sudo docker compose run --rm python-app
-sudo docker compose run --rm python-app
-sudo docker compose run --rm python-app
-```
+# Remover volumes (CUIDADO: apaga todos os dados)
+docker-compose down -v
 
-### 7.2. Modificar a Aplicação (Opcional)
-Para um exemplo mais interessante, você pode modificar o `app.py`:
-
-```python
-import time
-import random
-import opentracing
-from jaeger_client import Config
-
-def init_jaeger_tracer(service_name='my_service'):
-    config = Config(
-        config={
-            'sampler': {'type': 'const', 'param': 1},
-            'logging': True,
-        },
-        service_name=service_name,
-        validate=True,
-    )
-    return config.initialize_tracer()
-
-def process_data():
-    """Simula processamento de dados"""
-    time.sleep(random.uniform(0.1, 0.5))
-    return "processed_data"
-
-def save_to_database():
-    """Simula salvamento no banco de dados"""
-    time.sleep(random.uniform(0.2, 0.8))
-    return "saved"
-
-if __name__ == "__main__":
-    tracer = init_jaeger_tracer()
-    
-    with tracer.start_span('main_operation') as main_span:
-        main_span.set_tag('operation_type', 'data_processing')
-        
-        # Span filho para processamento
-        with tracer.start_span('process_data', child_of=main_span) as process_span:
-            process_span.set_tag('input_size', random.randint(100, 1000))
-            result = process_data()
-            process_span.log_kv({'event': 'data_processed', 'result': result})
-        
-        # Span filho para salvamento
-        with tracer.start_span('save_data', child_of=main_span) as save_span:
-            save_span.set_tag('database', 'postgresql')
-            status = save_to_database()
-            save_span.log_kv({'event': 'data_saved', 'status': status})
-        
-        main_span.log_kv({'event': 'operation_completed', 'total_items': 1})
-    
-    tracer.close()
-```
-
-Se modificar o arquivo, reconstrua e execute:
-```bash
-# Reconstruir e executar com o código modificado
-sudo docker compose up --build python-app
+# Limpeza completa
+docker system prune -a
 ```
 
 ---
 
-## 8. Troubleshooting
+## 📖 **Recursos Adicionais**
 
-### 8.1. Verificações Básicas
-```bash
-# Verificar se todos os contêineres estão rodando
-sudo docker compose ps
-
-# Verificar logs do Jaeger para erros
-sudo docker compose logs jaeger | tail -20
-
-# Verificar logs da aplicação Python
-sudo docker compose logs python-app
-
-# Verificar conectividade de rede
-sudo docker compose exec jaeger curl -I http://localhost:16686
-```
-
-### 8.2. Problemas Comuns
-
-**Jaeger não acessível via IP público:**
-- Verifique se o Security Group permite tráfego na porta 16686
-- Teste localmente primeiro: `curl http://localhost:16686`
-- Confirme que o IP público da EC2 está correto
-
-**Nenhum trace aparece na interface:**
-```bash
-# Verificar se a aplicação Python está enviando dados
-sudo docker compose logs python-app | grep -i jaeger
-
-# Executar novamente a aplicação
-sudo docker compose run --rm python-app
-
-# Verificar se o Jaeger está recebendo dados
-sudo docker compose logs jaeger | grep -i span
-```
-
-**Erro de build da aplicação Python:**
-```bash
-# Verificar se todos os arquivos estão presentes
-ls -la
-
-# Limpar imagens e reconstruir
-sudo docker compose down
-sudo docker system prune -f
-sudo docker compose up --build
-```
+- [Documentação Oficial Elastic Stack](https://www.elastic.co/guide/index.html)
+- [Nginx Log Format](https://nginx.org/en/docs/http/ngx_http_log_module.html)
+- [Docker Compose Reference](https://docs.docker.com/compose/)
+- [Kibana Query Language (KQL)](https://www.elastic.co/guide/en/kibana/current/kuery-query.html)
 
 ---
 
-## 9. Limpeza dos Recursos
+## 🤝 **Contribuição**
 
-### 9.1. Parar os Serviços
-```bash
-# Parar todos os contêineres (execute na instância EC2 da AWS Academy)
-sudo docker compose down
-
-# Para remover também os volumes (se houver)
-sudo docker compose down -v
-```
-
-### 9.2. Limpeza Completa
-```bash
-# Remover imagens criadas (opcional)
-sudo docker image prune -f
-
-# Remover contêineres parados
-sudo docker container prune -f
-
-# Voltar ao diretório anterior
-cd ../../../..
-```
+Para sugestões e melhorias:
+1. Faça um fork do repositório
+2. Crie uma branch para sua feature
+3. Faça commit das mudanças
+4. Abra um Pull Request
 
 ---
 
-## 10. Considerações para AWS Academy
+## 📝 **Changelog**
 
-### 10.1. Security Groups
-Certifique-se de que o Security Group da instância EC2 permite:
-- **Porta 16686** (HTTP) para a interface web do Jaeger
-
-### 10.2. Monitoramento de Recursos
-- O Jaeger pode consumir recursos significativos de CPU e memória
-- Monitore o uso de recursos da instância EC2
-- Sempre pare os contêineres quando não estiver usando
-
-### 10.3. Extensões Possíveis
-Para laboratórios mais avançados, você pode:
-- Integrar com outras aplicações microserviços
-- Configurar sampling rules personalizadas
-- Implementar OpenTelemetry
-- Conectar com sistemas de alertas
+### **v2025.1**
+- Migração para ELK Stack 8.11.3
+- Adição de Filebeat e Metricbeat
+- Logs estruturados em JSON
+- Interface web interativa
+- Health checks implementados
+- Configurações otimizadas
 
 ---
 
-## 11. Próximos Passos
-
-### 11.1. Exploração Adicional
-1. **Documentação do Jaeger**: https://www.jaegertracing.io/docs/
-2. **OpenTracing**: https://opentracing.io/
-3. **Instrumentação avançada**: Explore bibliotecas para frameworks web (Flask, Django, FastAPI)
-
-### 11.2. Integração com Kubernetes
-Para ambientes mais complexos, considere:
-- Deployment do Jaeger no Kubernetes
-- Sidecar pattern com Jaeger agent
-- Integração com Prometheus e Grafana
-
-#### 11.2.1. Exposição de Serviços Jaeger no Kubernetes
-Se você instalar o Jaeger no Kubernetes (via Helm ou Operator), frequentemente o serviço será criado como ClusterIP. Para expô-lo no ambiente AWS Academy, use:
-
-```bash
-# Exemplo: Converter serviço Jaeger de ClusterIP para NodePort
-sudo kubectl patch svc jaeger-query \
-  -p '{
-    "spec": {
-      "type": "NodePort",
-      "ports": [
-        {
-          "name": "http-query",
-          "port": 16686,
-          "targetPort": 16686,
-          "nodePort": 31686,
-          "protocol": "TCP"
-        }
-      ]
-    }
-  }'
-
-# Verificar a mudança
-sudo kubectl get svc jaeger-query
-```
-
-**Por que isso é útil:**
-- Jaeger Operator e Helm charts geralmente criam serviços ClusterIP
-- Permite acesso via IP público da EC2 sem recriar recursos
-- Essencial para visualizar traces no ambiente AWS Academy
-
----
-
-Com isso, você tem um ambiente completo de distributed tracing funcionando no AWS Academy, acessível via IP público da EC2, com traces visualizáveis na interface web do Jaeger para análise de performance e debugging de aplicações distribuídas. 
+**🎓 Desenvolvido para fins educacionais - Able2Cloud 2025** 
