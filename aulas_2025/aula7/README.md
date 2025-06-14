@@ -91,18 +91,7 @@ Nginx → Logs JSON → Filebeat/Logstash → Elasticsearch → Kibana
 
 ---
 
-## 📊 **Passo 5: Configurar Kibana**
-
-1. **Acesse Kibana**: http://`<IP_PUBLICO_DA_EC2>`:5601
-2. **Vá para**: Stack Management → Index Patterns
-3. **Crie os index patterns**:
-   - `logstash-nginx-*` (Time field: `@timestamp`)
-   - `filebeat-nginx-*` (Time field: `@timestamp`)
-   - `metricbeat-*` (Time field: `@timestamp`)
-
----
-
-## 🎯 **Passo 6: Gerar Logs de Teste**
+## 🎯 **Passo 5: Gerar Logs de Teste**
 
 **Acesse**: http://`<IP_PUBLICO_DA_EC2>`
 
@@ -114,15 +103,63 @@ Use os botões da interface:
 
 ---
 
-## 🔍 **Passo 7: Visualizar no Kibana**
+## 🔍 **Passo 6: Inserir Logs e Visualizar**
 
-1. **Vá para**: Discover
-2. **Selecione**: `logstash-nginx-*`
-3. **Explore os campos**:
-   - `remote_addr` - IP do cliente
-   - `status` - Código HTTP
-   - `request_time` - Tempo de resposta
-   - `geoip.*` - Localização geográfica
+### **A. Inserir logs de exemplo:**
+```bash
+# Inserir logs via API
+curl -X POST "localhost:9200/logstash-nginx-$(date +%Y.%m.%d)/_doc" \
+-H "Content-Type: application/json" \
+-d '{
+  "@timestamp": "'$(date -u +%Y-%m-%dT%H:%M:%S.%3NZ)'",
+  "remote_addr": "192.168.1.100",
+  "status": "200",
+  "request": "GET / HTTP/1.1",
+  "request_time": "0.001",
+  "http_user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+}'
+
+curl -X POST "localhost:9200/logstash-nginx-$(date +%Y.%m.%d)/_doc" \
+-H "Content-Type: application/json" \
+-d '{
+  "@timestamp": "'$(date -u +%Y-%m-%dT%H:%M:%S.%3NZ)'",
+  "remote_addr": "10.0.0.1",
+  "status": "404",
+  "request": "GET /test HTTP/1.1",
+  "request_time": "0.002",
+  "http_user_agent": "curl/7.68.0"
+}'
+
+curl -X POST "localhost:9200/logstash-nginx-$(date +%Y.%m.%d)/_doc" \
+-H "Content-Type: application/json" \
+-d '{
+  "@timestamp": "'$(date -u +%Y-%m-%dT%H:%M:%S.%3NZ)'",
+  "remote_addr": "203.0.113.15",
+  "status": "500",
+  "request": "POST /api/users HTTP/1.1",
+  "request_time": "1.234",
+  "http_user_agent": "PostmanRuntime/7.28.4"
+}'
+```
+
+### **B. Criar data view:**
+```bash
+curl -X POST "localhost:5601/api/data_views/data_view" \
+-H "kbn-xsrf: true" \
+-H "Content-Type: application/json" \
+-d '{
+  "data_view": {
+    "title": "logstash-nginx-*",
+    "timeFieldName": "@timestamp"
+  }
+}'
+```
+
+### **C. Visualizar no Kibana:**
+1. **Acesse**: http://`<IP_PUBLICO_DA_EC2>`:5601
+2. **Vá para**: Discover
+3. **Selecione**: `logstash-nginx-*`
+4. **Pronto!** Os logs aparecerão.
 
 ---
 
