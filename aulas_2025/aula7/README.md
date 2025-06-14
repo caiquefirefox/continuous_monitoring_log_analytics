@@ -197,3 +197,10 @@ curl http://localhost:5601/api/status
 ---
 
 **🎓 Desenvolvido para fins educacionais - Able2Cloud 2025** 
+docker container prune -f
+
+# Remover volumes não utilizados
+docker volume prune -f
+
+# Remover redes não utilizadas
+docker network prune -f
